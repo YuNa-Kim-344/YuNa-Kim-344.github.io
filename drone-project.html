@@ -298,6 +298,33 @@
       margin: 0 auto;
       border-radius: 12px;
     }
+    
+    .image-box {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #eee6dc;
+      border-radius: 16px;
+      padding: 18px;
+      margin: 24px 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .image-box img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: 560px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: 12px;
+      border: 1px solid #eee6dc;
+      background: #fff;
+      padding: 8px;
+    }
 
     .workflow {
       display: flex;
@@ -596,6 +623,7 @@
         <a href="#implementation">05. Model & Implementation</a>
         <a href="#results">06. Experiment Results</a>
         <a href="#demo">07. Source Code</a>
+        <a href="#demo">08. Paper / Presentation</a>
       </aside>
 
       <main>
@@ -990,6 +1018,32 @@
 
           <a class="source-button" href="https://github.com/hpcDrone/DAE-vlm" target="_blank">
             GitHub Repository 보기 →
+          </a>
+        </section>
+
+        <section class="section" id="paper">
+          <h2>08. Paper / Presentation</h2>
+        
+          <p>
+            본 프로젝트는 2025 대한전자공학회 추계학술대회 논문으로 작성되었으며,
+            아래에서 발표 포스터와 논문 파일을 확인할 수 있습니다.
+          </p>
+        
+          <h3>Presentation Poster</h3>
+        
+          <div class="image-box">
+            <img src="./drone/poster.jpg" alt="LLM 기반 의료진 보조 처방 시스템 발표 포스터" />
+            <p class="image-caption">대한전자공학회 하계학술대회 발표 포스터</p>
+          </div>
+        
+          <h3>Paper File</h3>
+        
+          <p>
+            논문 PDF 파일은 아래 버튼을 통해 확인할 수 있습니다.
+          </p>
+        
+          <a class="source-button" href="./drone/2025년 대한전자공학회 추계학술대회 논문.pdf" target="_blank">
+            논문 PDF 보기 →
           </a>
         </section>
 

@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>연합학습 기반 의료진 보조 처방 LLM</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Pretendard", "Noto Sans KR", Arial, sans-serif;
+      background: #faf9f6;
+      color: #2d2d2d;
+      line-height: 1.8;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1060px, 92%);
+      margin: 0 auto;
+      padding: 46px 0 90px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 34px;
+      color: #777;
+      font-size: 15px;
+      transition: 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #222;
+      transform: translateX(-3px);
+    }
+
+    .hero {
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 22px;
+      padding: 42px 46px;
+      margin-bottom: 34px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.035);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 6px 13px;
+      background: #eee7dc;
+      color: #6b5d4c;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .project-title {
+      font-size: 42px;
+      font-weight: 900;
+      color: #3f3f3f;
+      letter-spacing: -1.2px;
+      line-height: 1.25;
+      margin-bottom: 16px;
+    }
+
+    .project-summary {
+      font-size: 18px;
+      color: #5f5f5f;
+      max-width: 880px;
+      margin-bottom: 22px;
+    }
+
+    .project-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .meta-item {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .meta-item strong {
+      color: #333;
+      margin-right: 6px;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      padding: 6px 12px;
+      border-radius: 9px;
+      background: #f1ece4;
+      color: #555;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .content-layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 34px;
+      align-items: start;
+    }
+
+    .toc {
+      position: sticky;
+      top: 28px;
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.03);
+    }
+
+    .toc-title {
+      font-size: 16px;
+      font-weight: 900;
+      font-style: italic;
+      margin-bottom: 14px;
+    }
+
+    .toc a {
+      display: block;
+      color: #777;
+      font-size: 14px;
+      margin-bottom: 10px;
+      transition: 0.2s ease;
+    }
+
+    .toc a:hover {
+      color: #222;
+      padding-left: 4px;
+    }
+
+    .section {
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 18px;
+      padding: 34px 38px;
+      margin-bottom: 26px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.035);
+    }
+
+    .section h2 {
+      font-size: 25px;
+      font-weight: 900;
+      font-style: italic;
+      color: #3f3f3f;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee6dc;
+    }
+
+    .section h3 {
+      font-size: 20px;
+      margin: 22px 0 10px;
+      color: #3f3f3f;
+    }
+
+    .section p {
+      color: #444;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+
+    .section ul {
+      padding-left: 22px;
+    }
+
+    .section li {
+      margin-bottom: 10px;
+      color: #444;
+      font-size: 16px;
+    }
+
+    .highlight {
+      background: #fbfaf7;
+      border-left: 4px solid #8b7b66;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-top: 24px;
+      color: #4d4d4d;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .info-card,
+    .role-card,
+    .result-card {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 14px;
+      padding: 22px;
+    }
+
+    .info-card h3,
+    .role-card h3,
+    .result-card h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #3f3f3f;
+    }
+
+    .info-card p,
+    .role-card p,
+    .result-card p {
+      font-size: 15px;
+      color: #555;
+      margin: 0;
+    }
+
+    .result-number {
+      font-size: 30px;
+      font-weight: 900;
+      color: #8b7b66;
+      margin-bottom: 8px;
+    }
+
+    .flow-box {
+      background: #ffffff;
+      border: 1px solid #eee6dc;
+      border-radius: 16px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+
+    .flow-step {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      color: #444;
+      font-size: 15px;
+    }
+
+    .flow-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .flow-step strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .table-box {
+      width: 100%;
+      overflow-x: auto;
+      margin: 24px 0;
+      border-radius: 14px;
+      border: 1px solid #eee6dc;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      min-width: 720px;
+    }
+
+    th,
+    td {
+      padding: 13px 14px;
+      border-bottom: 1px solid #eee6dc;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background: #fbfaf7;
+      font-weight: 800;
+      color: #444;
+    }
+
+    td {
+      color: #555;
+    }
+
+    .image-box {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #eee6dc;
+      border-radius: 16px;
+      padding: 18px;
+      margin: 24px 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .image-box img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: 620px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: 12px;
+      border: 1px solid #eee6dc;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .image-caption {
+      font-size: 14px;
+      color: #777;
+      text-align: center;
+      margin-top: -4px;
+    }
+
+    .source-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 18px;
+      margin-right: 8px;
+      background: #333;
+      color: #fff;
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .source-button:hover {
+      background: #8b7b66;
+      transform: translateY(-2px);
+    }
+
+    .bottom-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 40px;
+    }
+
+    .nav-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #333;
+      color: #fff;
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .nav-button:hover {
+      background: #8b7b66;
+      transform: translateY(-2px);
+    }
+
+    footer {
+      text-align: center;
+      color: #aaa;
+      font-size: 13px;
+      margin-top: 70px;
+    }
+
+    @media (max-width: 900px) {
+      .content-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .toc {
+        position: static;
+      }
+
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: 92%;
+        padding-top: 30px;
+      }
+
+      .hero {
+        padding: 32px 24px;
+      }
+
+      .project-title {
+        font-size: 30px;
+      }
+
+      .project-summary {
+        font-size: 16px;
+      }
+
+      .section {
+        padding: 28px 22px;
+      }
+
+      .bottom-nav {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <a href="index.html#federated-medical-llm-card" class="back-link">← 포트폴리오로 돌아가기</a>
+
+    <header class="hero">
+      <span class="eyebrow">Project Detail</span>
+
+      <h1 class="project-title">연합학습 기반 의료진 보조 처방 LLM</h1>
+
+      <p class="project-summary">
+        기존 LLM 기반 의료진 보조 처방 시스템을 확장하여, 병원 간 원본 데이터를 공유하지 않고도
+        분산된 의료 데이터를 학습할 수 있는 연합학습 기반 처방 약물 추천 시스템을 구현했습니다.
+        MIMIC-IV 데이터 재전처리, Flower 기반 연합학습, FFA-LoRA, FlashAttention-2,
+        차등 프라이버시, Non-IID 환경 평가를 통해 개인정보 보호와 성능 안정성을 함께 검증했습니다.
+      </p>
+
+      <div class="project-meta">
+        <div class="meta-item"><strong>기간</strong>2025.01 ~ 2026.03</div>
+        <div class="meta-item"><strong>형태</strong>Team Project</div>
+        <div class="meta-item"><strong>역할</strong>Data Preprocessing / Federated Learning / LLM Fine-tuning / Differential Privacy / Evaluation / Paper Writing</div>
+      </div>
+
+      <div class="tag-list">
+        <span class="tag">Python</span>
+        <span class="tag">Llama</span>
+        <span class="tag">LLM</span>
+        <span class="tag">Federated Learning</span>
+        <span class="tag">Flower</span>
+        <span class="tag">Differential Privacy</span>
+        <span class="tag">FFA-LoRA</span>
+        <span class="tag">FlashAttention-2</span>
+        <span class="tag">MIMIC-IV</span>
+        <span class="tag">Medical AI</span>
+      </div>
+    </header>
+
+    <div class="content-layout">
+      <aside class="toc">
+        <p class="toc-title">CONTENTS</p>
+        <a href="#overview">01. Project Overview</a>
+        <a href="#motivation">02. Motivation & Goal</a>
+        <a href="#role">03. My Role</a>
+        <a href="#dataset">04. Dataset & Non-IID Split</a>
+        <a href="#method">05. Method</a>
+        <a href="#fl">06. Federated Learning Setup</a>
+        <a href="#evaluation">07. Evaluation Method</a>
+        <a href="#results">08. Experiment Results</a>
+        <a href="#conclusion">09. Conclusion</a>
+        <a href="#paper">10. Paper / Materials</a>
+        <a href="#source">11. Source Code</a>
+      </aside>
+
+      <main>
+        <section class="section" id="overview">
+          <h2>01. Project Overview</h2>
+
+          <p>
+            본 프로젝트는 이전에 수행한 LLM 기반 의료진 보조 처방 시스템을 확장한 연구입니다.
+            기존 연구가 단일 학습 환경에서 환자의 진단 정보를 바탕으로 처방 약물 리스트를 생성하는 데 초점을 맞췄다면,
+            본 프로젝트는 이를 여러 병원이 참여하는 분산 의료 데이터 환경으로 확장했습니다.
+          </p>
+
+          <p>
+            의료 데이터는 민감한 개인정보를 포함하기 때문에 병원 간 원본 데이터를 직접 공유하기 어렵습니다.
+            이에 본 프로젝트에서는 연합학습을 도입하여 각 병원이 로컬 데이터로 학습한 모델 업데이트만 서버에 전달하고,
+            서버는 FedAvg를 통해 글로벌 모델을 갱신하는 구조를 구성했습니다.
+          </p>
+
+          <div class="highlight">
+            핵심은 의료 데이터를 직접 공유하지 않으면서도 병원 간 협력 학습을 가능하게 하고,
+            LLM 기반 처방 약물 추천 성능을 분산 환경에서도 안정적으로 유지할 수 있는지 검증한 점입니다.
+          </div>
+        </section>
+
+        <section class="section" id="motivation">
+          <h2>02. Motivation & Goal</h2>
+
+          <h3>Research Motivation</h3>
+          <p>
+            의료진 부족과 업무 과중 문제는 전 세계적으로 지속되고 있으며,
+            특히 응급·중환자 진료 환경에서는 신속하고 정확한 처방 결정이 매우 중요합니다.
+            AI 기반 의료진 보조 시스템은 이러한 부담을 줄이는 데 도움을 줄 수 있습니다.
+          </p>
+
+          <p>
+            하지만 단일 병원 데이터만으로 학습한 모델은 처방 패턴이 특정 기관에 편향될 수 있습니다.
+            여러 병원의 데이터를 함께 활용하면 모델의 일반화 성능과 처방 다양성을 높일 수 있지만,
+            의료 데이터는 개인정보 보호 문제로 인해 직접 공유가 어렵습니다.
+          </p>
+
+          <h3>Research Goal</h3>
+          <ul>
+            <li>환자 진단 정보를 기반으로 처방 약물 리스트를 생성하는 LLM 기반 시스템 확장</li>
+            <li>병원 간 원본 데이터 공유 없이 협력 학습 가능한 연합학습 구조 구현</li>
+            <li>Flower 기반 Federated Learning 학습 환경 구성</li>
+            <li>Non-IID 의료 데이터 환경에서 연합학습 성능 안정성 평가</li>
+            <li>차등 프라이버시를 적용하여 모델 업데이트 기반 개인정보 역추적 위험 완화</li>
+            <li>FFA-LoRA와 FlashAttention-2를 결합하여 LLM 학습의 통신·메모리 비용 절감</li>
+          </ul>
+        </section>
+
+        <section class="section" id="role">
+          <h2>03. My Role</h2>
+
+          <div class="card-grid">
+            <div class="role-card">
+              <h3>Research Planning</h3>
+              <p>
+                기존 LLM 기반 의료진 보조 처방 시스템의 한계를 분석하고,
+                이를 연합학습 기반 다기관 협력 학습 구조로 확장하는 연구 방향을 설계했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>Data Preprocessing</h3>
+              <p>
+                MIMIC-IV 데이터를 다시 전처리하여 환자 정보, 진단 정보, 처방 약물 정보를 입원 단위로 병합하고,
+                LLM 학습을 위한 Input-Response 형태로 변환했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>Non-IID Dataset Split</h3>
+              <p>
+                연합학습 시뮬레이션을 위해 두 병원을 가정하고,
+                연령 분포 차이를 유도하여 A 병원과 B 병원의 Non-IID 데이터 환경을 구성했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>Federated Learning Implementation</h3>
+              <p>
+                Flower 프레임워크를 기반으로 서버와 클라이언트 학습 구조를 구성하고,
+                FedAvg 기반 글로벌 모델 업데이트 흐름을 실험했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>LLM Fine-tuning & Optimization</h3>
+              <p>
+                Llama3.1-8B-Instruct 기반 모델을 연합학습 환경에서 파인튜닝하고,
+                FlashAttention-2를 적용하여 LLM 학습의 메모리 사용량과 연산 병목을 줄였습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>Evaluation & Paper Writing</h3>
+              <p>
+                단일 학습과 연합학습 결과를 비교하고, 출력률·정확도·병원 간 성능 차이를 분석했습니다.
+                이후 실험 결과를 정리하여 논문 작성까지 수행했습니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="highlight">
+            본 프로젝트에서 저는 이전 의료 LLM 연구의 연장선 기획, MIMIC-IV 재전처리, Non-IID 데이터 분할,
+            연합학습 도입 및 파인튜닝, FlashAttention-2 적용, 실험 평가, 결과 분석, 논문 작성을 담당했습니다.
+            LoRA/LoRA-FA 이론 및 적용 부분은 공동 연구자의 도움을 받았습니다.
+          </div>
+        </section>
+
+        <section class="section" id="dataset">
+          <h2>04. Dataset & Non-IID Split</h2>
+
+          <p>
+            본 연구에서는 MIMIC-IV 데이터셋을 활용했습니다.
+            환자 ID와 입원 ID를 기준으로 환자 정보, 진단 정보, 처방 약물 데이터를 병합하고,
+            각 입원 단위의 진단 목록과 처방 약물 목록을 하나의 Input-Response 쌍으로 구성했습니다.
+          </p>
+
+          <div class="flow-box">
+            <div class="flow-step">
+              <strong>Step 1. Raw Data Selection</strong>
+              patient, omr, diagnoses_icd, prescriptions 등 필요한 의료 테이블을 선택했습니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 2. Admission-based Merge</strong>
+              subject_id와 hadm_id를 기준으로 환자 정보, 진단명, 처방 약물 리스트를 병합했습니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 3. Prompt Conversion</strong>
+              환자의 정보와 진단 목록을 input_text로 구성하고, 처방 약물 리스트를 response_text로 변환했습니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 4. Hospital Split</strong>
+              연합학습 환경을 위해 데이터를 A 병원과 B 병원으로 분할했습니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 5. Non-IID Setting</strong>
+              나이 분포를 기준으로 병원 간 데이터 이질성을 만들어 실제 임상 환경과 유사한 Non-IID 조건을 구성했습니다.
+            </div>
+          </div>
+
+          <div class="image-box">
+            <img src="./F-LLM/전처리.jpg" alt="MIMIC-IV 전처리 데이터셋 구조" />
+            <p class="image-caption">MIMIC-IV 원본 데이터와 LLM 학습용 Input-Response 데이터 구성 예시</p>
+          </div>
+
+          <div class="image-box">
+            <img src="./F-LLM/연령 분할.jpg" alt="연령 분포 기반 Non-IID 데이터 분할" />
+            <p class="image-caption">A 병원과 B 병원의 연령 분포 차이를 통한 Non-IID 환경 구성</p>
+          </div>
+
+          <div class="highlight">
+            MIMIC-IV는 단일 진단과 특정 처방 약물을 1:1로 연결하는 명확한 키가 없기 때문에,
+            입원 단위의 모든 진단 목록과 모든 처방 약물 목록을 함께 묶어 학습 데이터로 구성했습니다.
+            이 구조적 특성은 정확도 평가가 낮게 측정될 수 있는 주요 원인입니다.
+          </div>
+        </section>
+
+        <section class="section" id="method">
+          <h2>05. Method</h2>
+
+          <h3>LLM Backbone</h3>
+          <p>
+            Backbone 모델로는 Llama3.1-8B-Instruct를 사용했습니다.
+            해당 모델은 instruction 기반 입력에 적합하고, 의료 진단 정보를 바탕으로 처방 약물 리스트를 생성하는
+            텍스트 생성 태스크에 활용하기 적합하다고 판단했습니다.
+          </p>
+
+          <h3>FFA-LoRA</h3>
+          <p>
+            연합학습 환경에서 일반 LoRA를 적용할 경우, 각 클라이언트의 LoRA A/B 행렬을 FedAvg로 집계하는 과정에서
+            수학적 불일치가 발생할 수 있습니다. 이를 완화하기 위해 A 행렬을 고정하고 B 행렬만 학습하는
+            LoRA-FA 구조를 연합학습에 적용한 FFA-LoRA를 사용했습니다.
+          </p>
+
+          <h3>FlashAttention-2</h3>
+          <p>
+            Transformer의 Self-Attention 연산은 입력 길이가 길어질수록 메모리 사용량과 계산량이 크게 증가합니다.
+            본 프로젝트에서는 FlashAttention-2를 적용하여 LLM 학습 과정의 메모리 병목과 연산 비용을 줄였습니다.
+          </p>
+
+          <h3>Differential Privacy</h3>
+          <p>
+            연합학습은 원본 데이터를 공유하지 않는다는 장점이 있지만, 모델 업데이트를 통해 개인정보가 역추적될 가능성이 있습니다.
+            이를 완화하기 위해 Flower에서 제공하는 Central Differential Privacy 방식을 적용하여
+            서버 집계 단계에서 노이즈를 추가했습니다.
+          </p>
+
+          <div class="image-box">
+            <img src="./F-LLM/구조.jpg" alt="연합학습 기반 의료 LLM 모델 구조" />
+            <p class="image-caption">FFA-LoRA와 FlashAttention-2를 적용한 Llama3.1-8B-Instruct 기반 모델 구조</p>
+          </div>
+        </section>
+
+        <section class="section" id="fl">
+          <h2>06. Federated Learning Setup</h2>
+
+          <p>
+            실험은 두 개의 병원 클라이언트와 하나의 중앙 서버가 존재하는 상황을 가정하여 구성했습니다.
+            각 클라이언트는 자신의 로컬 의료 데이터로 LLM을 학습하고, 서버는 클라이언트 가중치를 전달받아
+            FedAvg 방식으로 글로벌 모델을 업데이트했습니다.
+          </p>
+
+          <div class="card-grid">
+            <div class="info-card">
+              <h3>Server</h3>
+              <p>
+                AMD Ryzen Threadripper PRO 5955WX 16-Cores CPU와 RTX 4080 24GB GPU 2개를 사용했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Client</h3>
+              <p>
+                각 클라이언트는 AMD Ryzen Threadripper PRO 3955WX 16-Cores CPU와 RTX 6000 Ada 48GB GPU 환경에서 학습했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Framework</h3>
+              <p>
+                Flower 프레임워크를 활용하여 연합학습 서버-클라이언트 구조를 구현했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Aggregation</h3>
+              <p>
+                각 클라이언트의 데이터 수를 반영한 FedAvg 방식으로 글로벌 모델 업데이트를 수행했습니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="flow-box">
+            <div class="flow-step">
+              <strong>Round 1. Local Training</strong>
+              각 병원 클라이언트가 자신에게 할당된 의료 데이터로 로컬 모델을 학습합니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Round 2. Weight Upload</strong>
+              각 클라이언트는 원본 데이터가 아니라 학습된 모델 가중치만 서버로 전송합니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Round 3. Central DP</strong>
+              서버는 전달받은 업데이트에 차등 프라이버시 노이즈를 추가합니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Round 4. FedAvg Aggregation</strong>
+              서버는 클라이언트 업데이트를 가중 평균하여 글로벌 모델을 갱신합니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Round 5. Repeat</strong>
+              이 과정을 여러 라운드 반복하며 글로벌 모델의 성능을 평가합니다.
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="evaluation">
+          <h2>07. Evaluation Method</h2>
+
+          <p>
+            처방 약물 추천은 하나의 정답만 존재하는 단순 분류 문제가 아니기 때문에,
+            모델이 출력한 약물 리스트와 실제 처방 리스트의 일치 정도를 기준으로 정확도를 계산했습니다.
+          </p>
+
+          <div class="highlight">
+            Accuracy = 각 샘플에서 출력된 약물 중 정답 약물과 일치한 약물 개수 / 전체 출력 약물 개수의 평균
+          </div>
+
+          <p>
+            또한 처방 약물 데이터는 진단-약물 간 1:1 연결이 불명확하기 때문에,
+            실제로 임상적으로 타당한 약물임에도 정답 리스트에 없으면 정확도에서 낮게 평가될 수 있습니다.
+            따라서 결과 해석에서는 단순 정확도뿐 아니라 출력률과 의료적 적합성 가능성도 함께 고려했습니다.
+          </p>
+        </section>
+
+        <section class="section" id="results">
+          <h2>08. Experiment Results</h2>
+
+          <h3>8.1 Single Learning Results</h3>
+
+          <p>
+            전체 데이터를 단일 노드에서 학습한 결과, step 5112에서 가장 높은 정확도인 24.8%를 기록했습니다.
+            학습이 지나치게 진행될수록 출력률이 낮아지는 경향도 확인했습니다.
+          </p>
+
+          <div class="table-box">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Step</th>
+                  <th>출력률</th>
+                  <th>정확도</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>32</td><td>852</td><td>100%</td><td>19.3%</td></tr>
+                <tr><td>32</td><td>1704</td><td>95%</td><td>20.5%</td></tr>
+                <tr><td>32</td><td>2556</td><td>90%</td><td>23.7%</td></tr>
+                <tr><td>32</td><td>3408</td><td>95%</td><td>21.5%</td></tr>
+                <tr><td>32</td><td>4260</td><td>95%</td><td>20.5%</td></tr>
+                <tr><td>32</td><td>5112</td><td>90%</td><td>24.8%</td></tr>
+                <tr><td>32</td><td>5964</td><td>65%</td><td>24.5%</td></tr>
+                <tr><td>32</td><td>6816</td><td>45%</td><td>21.3%</td></tr>
+                <tr><td>32</td><td>7668</td><td>35%</td><td>21.7%</td></tr>
+                <tr><td>32</td><td>8520</td><td>35%</td><td>18.3%</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>8.2 Federated Learning Results</h3>
+
+          <p>
+            연합학습에서는 A 병원과 B 병원으로 분할된 데이터셋을 사용하여 총 10라운드 학습을 수행했습니다.
+            A 병원에서는 round 5에서 24.2%, B 병원에서는 round 2에서 24.0%의 최고 정확도를 기록했습니다.
+          </p>
+
+          <div class="card-grid">
+            <div class="result-card">
+              <h3>Hospital A Best Accuracy</h3>
+              <div class="result-number">24.2%</div>
+              <p>Federated Learning round 5에서 가장 높은 정확도를 기록했습니다.</p>
+            </div>
+
+            <div class="result-card">
+              <h3>Hospital B Best Accuracy</h3>
+              <div class="result-number">24.0%</div>
+              <p>Federated Learning round 2에서 가장 높은 정확도를 기록했습니다.</p>
+            </div>
+
+            <div class="result-card">
+              <h3>FL Average Accuracy</h3>
+              <div class="result-number">24.1%</div>
+              <p>A/B 병원 평균 기준 단일 학습 평균보다 높은 결과를 보였습니다.</p>
+            </div>
+
+            <div class="result-card">
+              <h3>A-B Difference</h3>
+              <div class="result-number">0.2%</div>
+              <p>Non-IID 환경에서도 병원 간 성능 차이가 작게 유지되었습니다.</p>
+            </div>
+
+          </div>
+
+          <h4 class="sub-result-title">Hospital A Federated Learning Results</h4>
+
+            <div class="table-box">
+            <table>
+                <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Dataset</th>
+                    <th>Round</th>
+                    <th>출력률</th>
+                    <th>정확도</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td rowspan="9">32</td>
+                    <td rowspan="9">A</td>
+                    <td>1</td>
+                    <td>100%</td>
+                    <td>21.7%</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>100%</td>
+                    <td>18.8%</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>100%</td>
+                    <td>19.5%</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>100%</td>
+                    <td>20.2%</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>100%</td>
+                    <td class="best-score">24.2%</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>100%</td>
+                    <td>20.3%</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>100%</td>
+                    <td>20.0%</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>100%</td>
+                    <td>21.5%</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>100%</td>
+                    <td>21.3%</td>
+                </tr>
+                </tbody>
+            </table>
+            </div>
+
+            <h4 class="sub-result-title">Hospital B Federated Learning Results</h4>
+
+            <div class="table-box">
+            <table>
+                <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Dataset</th>
+                    <th>Round</th>
+                    <th>출력률</th>
+                    <th>정확도</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td rowspan="9">32</td>
+                    <td rowspan="9">B</td>
+                    <td>1</td>
+                    <td>100%</td>
+                    <td>23.2%</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>100%</td>
+                    <td class="best-score">24.0%</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>100%</td>
+                    <td>23.8%</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>100%</td>
+                    <td>21.6%</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>100%</td>
+                    <td>20.5%</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>100%</td>
+                    <td>23.0%</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>100%</td>
+                    <td>21.6%</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>100%</td>
+                    <td>21.3%</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>100%</td>
+                    <td>23.1%</td>
+                </tr>
+                </tbody>
+            </table>
+            </div>
+
+          <h3>8.3 Single vs Federated Learning</h3>
+
+          <div class="table-box">
+            <table>
+              <thead>
+                <tr>
+                  <th>Learning Method</th>
+                  <th>Dataset</th>
+                  <th>출력률</th>
+                  <th>정확도</th>
+                  <th>Avg</th>
+                  <th>Difference</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Single</td>
+                  <td>Full</td>
+                  <td>90%</td>
+                  <td>24.8%</td>
+                  <td>-</td>
+                  <td>-</td>
+                </tr>
+                <tr>
+                  <td>Single</td>
+                  <td>A</td>
+                  <td>75%</td>
+                  <td>22.9%</td>
+                  <td>23.0%</td>
+                  <td>0.2%</td>
+                </tr>
+                <tr>
+                  <td>Single</td>
+                  <td>B</td>
+                  <td>95%</td>
+                  <td>23.1%</td>
+                  <td>23.0%</td>
+                  <td>0.2%</td>
+                </tr>
+                <tr>
+                  <td>FL</td>
+                  <td>Full</td>
+                  <td>100%</td>
+                  <td>23.6%</td>
+                  <td>-</td>
+                  <td>-</td>
+                </tr>
+                <tr>
+                  <td>FL</td>
+                  <td>A</td>
+                  <td>100%</td>
+                  <td>24.2%</td>
+                  <td>24.1%</td>
+                  <td>0.2%</td>
+                </tr>
+                <tr>
+                  <td>FL</td>
+                  <td>B</td>
+                  <td>100%</td>
+                  <td>24.0%</td>
+                  <td>24.1%</td>
+                  <td>0.2%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="highlight">
+
+            단일 학습은 Full dataset 기준 24.8%로 가장 높은 정확도를 보였지만,
+          
+            A/B 분할 평가에서는 평균 23.0%를 기록했습니다. 반면 연합학습은 A/B 분할 환경에서
+          
+            평균 24.1%를 달성하여 단일 학습 대비 약 1.1% 높은 성능을 보였고,
+          
+            A와 B 간 성능 차이도 0.2%로 유지되어 안정적인 학습 결과를 확인했습니다.
+          
+          </div>
+
+
+          <h3>8.4 Single Diagnosis Evaluation</h3>
+
+          <p>
+            다중 진단 환경에서는 여러 진단과 여러 약물이 섞여 정확도 평가가 어려운 한계가 있었습니다.
+            이를 보완하기 위해 단일 진단 입력 환경에서도 평가를 수행했으며,
+            연합학습 모델은 Base 모델 대비 출력률을 크게 향상시켰습니다.
+          </p>
+
+          <div class="table-box">
+            <table>
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>출력률</th>
+                  <th>정확도</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Base</td>
+                  <td>39%</td>
+                  <td>61.5%</td>
+                </tr>
+                <tr>
+                  <td>FL</td>
+                  <td>79%</td>
+                  <td>58.2%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="highlight">
+            FL 모델은 Base 모델보다 정확도는 약간 낮아 보일 수 있지만, 출력률이 39%에서 79%로 크게 증가했습니다.
+            이는 더 많은 진단 입력에 대해 처방 약물 추천을 시도한다는 의미이며,
+            실제 의료진 보조 시스템의 활용 가능성을 높이는 결과로 해석할 수 있습니다.
+          </div>
+        </section>
+
+        <section class="section" id="conclusion">
+          <h2>09. Conclusion</h2>
+
+          <p>
+            본 프로젝트는 LLM 기반 처방 약물 추천 시스템을 연합학습 환경으로 확장하여,
+            병원 간 원본 데이터 공유 없이도 협력 학습이 가능함을 확인했습니다.
+            단일 학습은 Full dataset 기준에서 더 높은 정확도를 보였지만,
+            분할된 A/B 병원 데이터 기준에서는 연합학습이 더 높은 평균 정확도를 기록했습니다.
+          </p>
+
+          <p>
+            또한 Non-IID 환경에서도 A 병원과 B 병원 간 성능 차이가 0.2%로 작게 유지되어,
+            연합학습이 데이터 분산 환경에서도 안정적인 성능을 보일 수 있음을 확인했습니다.
+          </p>
+
+          <div class="highlight">
+            이 연구는 의료진의 판단을 대체하는 시스템이 아니라,
+            개인정보를 보호하면서 여러 병원의 의료 지식을 학습하고,
+            의료진이 최종 처방 결정을 내릴 때 참고할 수 있는 보조 도구로서의 가능성을 보여줍니다.
+          </div>
+        </section>
+
+        <section class="section" id="paper">
+          <h2>10. Paper / Materials</h2>
+
+          <p>
+            본 프로젝트는 논문으로 작성 완료되었으며, 현재 학술지 제출을 예정하고 있습니다.
+          </p>
+
+          <a class="source-button" href="./F-LLM/A Secure Federated LLM for Clinical Decision Support in Drug Prescription.pdf" target="_blank">
+            논문 PDF 보기 →
+          </a>
+        </section>
+
+        <section class="section" id="source">
+          <h2>11. Source Code</h2>
+
+          <p>
+            프로젝트 코드 또는 실험 자료를 공개할 수 있는 경우 아래 GitHub 링크를 수정하여 연결하면 됩니다.
+          </p>
+
+          <a class="source-button" href="https://github.com/YuNa-Kim-344/A-study-on-LLM-based-Federated-Learning-for-ensuring-privacy-of-medical-data" target="_blank">
+            GitHub Repository 보기 →
+          </a>
+        </section>
+
+        <div class="bottom-nav">
+          <a href="index.html#federated-medical-llm-card" class="nav-button">← 포트폴리오로 돌아가기</a>
+          <a href="#" class="nav-button">맨 위로 ↑</a>
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      © 2026 김유나. All rights reserved.
+    </footer>
+  </div>
+</body>
+</html>
