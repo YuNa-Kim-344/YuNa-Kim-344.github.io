@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>자율 순찰 드론 웹 서비스 백엔드 구현</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Pretendard", "Noto Sans KR", Arial, sans-serif;
+      background: #faf9f6;
+      color: #2d2d2d;
+      line-height: 1.8;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1060px, 92%);
+      margin: 0 auto;
+      padding: 46px 0 90px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 34px;
+      color: #777;
+      font-size: 15px;
+      transition: 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #222;
+      transform: translateX(-3px);
+    }
+
+    .hero {
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 22px;
+      padding: 42px 46px;
+      margin-bottom: 34px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.035);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 6px 13px;
+      background: #eee7dc;
+      color: #6b5d4c;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .project-title {
+      font-size: 42px;
+      font-weight: 900;
+      color: #3f3f3f;
+      letter-spacing: -1.2px;
+      line-height: 1.25;
+      margin-bottom: 16px;
+    }
+
+    .project-summary {
+      font-size: 18px;
+      color: #5f5f5f;
+      max-width: 860px;
+      margin-bottom: 22px;
+    }
+
+    .project-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .meta-item {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .meta-item strong {
+      color: #333;
+      margin-right: 6px;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      padding: 6px 12px;
+      border-radius: 9px;
+      background: #f1ece4;
+      color: #555;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .visual-box {
+      width: 100%;
+      min-height: 330px;
+      background: linear-gradient(135deg, #e8eef7, #f7efe7);
+      border: 1px solid #e7e3dc;
+      border-radius: 20px;
+      margin-bottom: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #777;
+      text-align: center;
+      padding: 30px;
+      overflow: hidden;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.025);
+    }
+
+    .visual-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 14px;
+    }
+
+    .architecture-image {
+      width: 100%;
+      max-width: 100%;
+      background: #ffffff;
+      border: 1px solid #eee6dc;
+      border-radius: 16px;
+      padding: 18px;
+      margin: 24px 0;
+      overflow: hidden;
+      }
+
+    .architecture-image img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: 420px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: 12px;
+      }
+
+    .content-layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 34px;
+      align-items: start;
+    }
+
+    .toc {
+      position: sticky;
+      top: 28px;
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.03);
+    }
+
+    .toc-title {
+      font-size: 16px;
+      font-weight: 900;
+      font-style: italic;
+      margin-bottom: 14px;
+    }
+
+    .toc a {
+      display: block;
+      color: #777;
+      font-size: 14px;
+      margin-bottom: 10px;
+      transition: 0.2s ease;
+    }
+
+    .toc a:hover {
+      color: #222;
+      padding-left: 4px;
+    }
+
+    .section {
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 18px;
+      padding: 34px 38px;
+      margin-bottom: 26px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.035);
+    }
+
+    .section h2 {
+      font-size: 25px;
+      font-weight: 900;
+      font-style: italic;
+      color: #3f3f3f;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee6dc;
+    }
+
+    .section p {
+      color: #444;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+
+    .section ul {
+      padding-left: 22px;
+    }
+
+    .section li {
+      margin-bottom: 10px;
+      color: #444;
+      font-size: 16px;
+    }
+
+    .highlight {
+      background: #fbfaf7;
+      border-left: 4px solid #8b7b66;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-top: 18px;
+      color: #4d4d4d;
+    }
+    .role-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .role-card {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 14px;
+      padding: 24px;
+    }
+
+    .role-card h3 {
+      font-size: 20px;
+      margin-bottom: 12px;
+      color: #3f3f3f;
+    }
+
+    .role-card p {
+      font-size: 16px;
+      color: #555;
+      margin: 0;
+    }
+
+    .role-more-btn {
+      margin-top: 18px;
+      border: none;
+      background: #333;
+      color: #fff;
+      border-radius: 999px;
+      padding: 8px 15px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .role-more-btn:hover {
+      background: #8b7b66;
+    }
+
+    .role-detail {
+      display: none;
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid #eee6dc;
+    }
+
+    .role-card.active .role-detail {
+      display: block;
+    }
+
+    .role-detail img {
+      width: 100%;
+      max-height: 420px;
+      object-fit: contain;
+      display: block;
+      margin: 14px auto 0;
+      border-radius: 12px;
+      border: 1px solid #eee6dc;
+      background: #fff;
+      padding: 12px;
+    }
+
+    .demo-video-box {
+      width: 100%;
+      margin-top: 22px;
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 16px;
+      padding: 18px;
+      overflow: hidden;
+    }
+
+    .demo-video-box video {
+      width: 100%;
+      max-height: 520px;
+      display: block;
+      border-radius: 12px;
+      background: #000;
+    }
+
+    .architecture {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .arch-item {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 14px;
+      padding: 18px 12px;
+      text-align: center;
+      font-size: 14px;
+      color: #555;
+      min-height: 92px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .arch-item strong {
+      display: block;
+      color: #333;
+      margin-bottom: 4px;
+      font-size: 15px;
+    }
+
+    .arrow {
+      color: #9a8c77;
+      font-weight: 900;
+      text-align: center;
+      margin: 10px 0 0;
+      display: none;
+    }
+
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .feature {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .feature h3 {
+      font-size: 17px;
+      margin-bottom: 9px;
+      color: #3f3f3f;
+    }
+
+    .feature p {
+      font-size: 15px;
+      color: #555;
+      margin: 0;
+    }
+
+    .bottom-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 40px;
+    }
+
+    .nav-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #333;
+      color: #fff;
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .nav-button:hover {
+      background: #8b7b66;
+      transform: translateY(-2px);
+    }
+
+    .github-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 18px;
+      background: #333;
+      color: #fff;
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 14px;
+      transition: 0.2s ease;
+      }
+
+    .github-button:hover {
+      background: #8b7b66;
+      transform: translateY(-2px);
+      }
+
+    footer {
+      text-align: center;
+      color: #aaa;
+      font-size: 13px;
+      margin-top: 70px;
+    }
+
+    @media (max-width: 900px) {
+      .content-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .toc {
+        position: static;
+      }
+
+      .architecture,
+      .role-grid,
+      .feature-list {
+        grid-template-columns: 1fr;
+      }
+
+      .arrow {
+        display: block;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: 92%;
+        padding-top: 30px;
+      }
+
+      .hero {
+        padding: 32px 24px;
+      }
+
+      .project-title {
+        font-size: 30px;
+      }
+
+      .project-summary {
+        font-size: 16px;
+      }
+
+      .section {
+        padding: 28px 22px;
+      }
+
+      .bottom-nav {
+        flex-direction: column;
+      }
+      
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <a href="index.html#drone-web-card" class="back-link">← 포트폴리오로 돌아가기</a>
+
+    <header class="hero">
+      <span class="eyebrow">Project Detail</span>
+
+      <h1 class="project-title">자율 순찰 드론 웹 서비스 백엔드 구현</h1>
+
+      <p class="project-summary">
+        관리자가 드론을 활용해 원하는 지역을 자율 순찰할 수 있도록 지원하는 웹 서비스를 구현했습니다.
+      </p>
+
+      <div class="project-meta">
+        <div class="meta-item"><strong>기간</strong>2025.03 ~ 2025.06</div>
+        <div class="meta-item"><strong>역할</strong>UI Design / Backend / Database / Drone-Server Communication / Deployment</div>
+        <div class="meta-item"><strong>형태</strong>Team Project</div>
+      </div>
+
+      <div class="tag-list">
+        <span class="tag">ERD</span>
+        <span class="tag">Spring Boot</span>
+        <span class="tag">MariaDB</span>
+        <span class="tag">FastAPI</span>
+        <span class="tag">Jetson</span>
+        <span class="tag">Docker</span>
+      </div>
+    </header>
+
+
+
+    <div class="content-layout">
+      <aside class="toc">
+        <p class="toc-title">CONTENTS</p>
+        <a href="#overview">01. Project Overview</a>
+        <a href="#motivation">02. Motivation & Goal</a>
+        <a href="#role">03. My Role</a>
+        <a href="#architecture">04. System Architecture</a>
+        <a href="#features">05. Key Features</a>
+        <a href="#etc">06. Demo Video</a>
+      </aside>
+
+      <main>
+        <section class="section" id="overview">
+          <h2>01. Project Overview</h2>
+          <p>
+            이 프로젝트는 관리자가 웹 서비스를 통해 드론의 자율 순찰을 제어할 수 있도록 지원하는
+            웹페이지 구현 프로젝트입니다. 
+          </p>
+
+          <p>
+            사용자는 웹 화면에서 드론 순찰 관련 기능을 확인하고,
+            지도에서 자율 주행할 경로를 선택하여 순찰을 수행시킬 수 있습니다.
+          </p>
+          
+          <p>
+            서버는 드론과 연결된 Jetson 장치와 통신하여 순찰 명령 및 상태 신호를 주고받는 구조로 설계했으며,
+            관리자가 드론의 동작 상태를 웹 화면에서 시각적으로 확인할 수 있도록 구성했습니다.
+          
+          </p>
+          <p>
+            저는 이 프로젝트에서 관리자 웹페이지의 화면 구조를 설계하고, 서비스 동작에 필요한
+            백엔드 API, 데이터베이스, Jetson 연동, Docker 기반 배포 환경 구성을 담당했습니다.
+          </p>
+
+          <div class="highlight">
+            핵심은 단순한 웹페이지 구현이 아니라, 웹 서비스와 드론 장치 사이의 신호 흐름을 서버 구조로 연결해
+            실제 자율 순찰 서비스가 동작할 수 있도록 구성한 점입니다.
+          </div>
+        </section>
+
+        <section class="section" id="motivation">
+          <h2>02. Motivation & Goal</h2>
+          <p>
+            기존의 드론 순찰은 관리자가 근거리에서 직접 조종하거나, 촬영된 영상을 사람이 직접 확인하여
+            상황을 판단해야 하는 경우가 많습니다. 이 방식은 순찰 범위가 제한되고, 문제 상황이 발생했을 때
+            즉각적인 상황 파악과 대응이 지연될 수 있다는 한계가 있습니다.
+          </p>
+        
+          <p>
+            본 프로젝트는 관리자가 드론을 직접 조종하지 않고도 웹페이지에서 순찰 경로를 지정하면,
+            드론이 해당 경로를 따라 자율 주행하며 순찰을 수행할 수 있도록 하는 것을 목표로 했습니다.
+            또한 드론의 연결 상태, 순찰 상태, 동작 정보를 관리자가 한 화면에서 시각적으로 확인할 수 있도록
+            구성하여 운영 편의성을 높이고자 했습니다.
+          </p>
+        
+          <div class="highlight">
+            핵심 목표는 관리자가 웹 기반 환경에서 순찰 경로를 지정하고, 드론 상태를 확인하며,
+            서버를 통해 드론과 신호를 주고받을 수 있는 자율 순찰 관리 구조를 구현하는 것입니다.
+          </div>
+        </section>
+
+        <section class="section" id="role">
+          <h2>03. My Role</h2>
+
+          <div class="role-grid">
+            <div class="role-card">
+              <h3>UI Design</h3>
+              <p>
+                관리자 웹페이지의 화면 구조와 UI 흐름을 설계했습니다.
+                실제 프론트엔드 구현보다는 서비스 사용 흐름과 화면 구성을 중심으로 담당했습니다.
+              </p>
+          
+              <button class="role-more-btn" type="button" onclick="toggleRole(this)">
+                더보기 ↓
+              </button>
+          
+              <div class="role-detail">
+                <p>
+                  사용자가 드론의 연결 상태, 순찰 상태, 경로 설정 정보를 한 화면에서 확인할 수 있도록
+                  화면 구조를 피그마로 설계했습니다.
+                </p>
+                <img src="./drone-web-project/UI 설계.jpg" alt="관리자 웹페이지 UI 설계 이미지" />
+              </div>
+            </div>
+          
+            <div class="role-card">
+              <h3>Database</h3>
+              <p>
+                MariaDB를 활용하여 서비스에 필요한 데이터베이스 구조를 설계하고 구성했습니다.
+                필요한 테이블과 관계를 ERD 형태로 정리했습니다.
+              </p>
+          
+              <button class="role-more-btn" type="button" onclick="toggleRole(this)">
+                더보기 ↓
+              </button>
+          
+              <div class="role-detail">
+                <p>
+                  드론 정보, 순찰 경로, 순찰 기록, 사용자 및 관리자 정보 등 서비스 운영에 필요한 데이터를
+                  저장할 수 있도록 데이터베이스 구조를 구성했습니다.
+                </p>
+                <img src="./drone-web-project/ERD.jpg" alt="드론 서비스 ERD 이미지" />
+              </div>
+            </div>
+          
+            <div class="role-card">
+              <h3>Backend API</h3>
+              <p>
+                Spring Boot를 활용하여 웹 서비스에 필요한 백엔드 API를 구현했습니다.
+                드론 순찰 서비스에서 필요한 데이터 처리와 요청 흐름을 담당했습니다.
+              </p>
+          
+              <button class="role-more-btn" type="button" onclick="toggleRole(this)">
+                더보기 ↓
+              </button>
+          
+              <div class="role-detail">
+                <p>
+                  관리자의 요청을 처리하고, 데이터베이스와 연동하여 순찰 관련 데이터를 저장하거나 조회할 수 있도록
+                  서버 API를 구현했습니다.
+                </p>
+                <img src="./drone-web-project/API.jpg" alt="Spring Boot API 구조 이미지" />
+              </div>
+            </div>
+          
+            <div class="role-card">
+              <h3>Drone-Server Communication</h3>
+              <p>
+                드론에 연결된 Jetson과 Spring Boot 서버가 신호를 주고받을 수 있도록
+                FastAPI 기반 연동 구조를 구성했습니다.
+              </p>
+          
+              <button class="role-more-btn" type="button" onclick="toggleRole(this)">
+                더보기 ↓
+              </button>
+          
+              <div class="role-detail">
+                <p>
+                  Jetson에서 FastAPI 서버를 실행하고, Spring Boot 서버와 통신하도록 구성하여
+                  드론의 신호가 웹 서비스까지 전달될 수 있도록 했습니다.
+                </p>
+                <img src="./drone-web-project/drone-jetson.jpg" alt="드론 서버 연동 구조 이미지" />
+                <img src="./drone-web-project/drone-jetson2.jpg" alt="드론 서버 연동 구조 이미지" />
+              </div>
+            </div>
+          
+            <div class="role-card">
+              <h3>Deployment</h3>
+              <p>
+                Docker 컨테이너를 활용하여 수정된 서버 코드를 서비스에 반영할 수 있는
+                배포 환경을 구성했습니다.
+              </p>
+          
+              <!-- <button class="role-more-btn" type="button" onclick="toggleRole(this)">
+                더보기 ↓
+              </button>
+          
+              <div class="role-detail">
+                <p>
+                  서버 코드가 수정되었을 때 컨테이너 환경에 반영하여 서비스에 적용할 수 있도록
+                  Docker 기반 실행 및 배포 구조를 구성했습니다.
+                </p>
+                <img src="docker-deploy.png" alt="Docker 배포 구조 이미지" />
+              </div> -->
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="architecture">
+          <h2>04. System Architecture</h2>
+        
+          <p>
+            전체 시스템은 관리자 웹페이지, Spring Boot 서버, MariaDB 데이터베이스,
+            Jetson의 FastAPI 서버, 드론으로 구성됩니다.
+          </p>
+        
+          <div class="architecture-image">
+            <img src="./drone-web-project/system.jpg" alt="자율 순찰 드론 서비스 시스템 구조도" />
+          </div>
+        
+          <div class="highlight">
+            관리자가 웹에서 순찰 시작 명령을 보내면 Spring Boot 서버가 요청을 처리하고,
+            Jetson에서 동작하는 FastAPI 서버를 통해 드론으로 명령이 전달됩니다.
+            이후 드론의 상태 및 결과 데이터는 다시 서버를 거쳐 관리자 화면으로 전달됩니다.
+          </div>
+        </section>
+
+        <section class="section" id="features">
+          <h2>05. Source Code</h2>
+            <p>
+              프로젝트에서 구현한 백엔드 API, 데이터베이스 구성, Jetson-FastAPI 연동 및 Docker 배포 관련 코드는
+              아래 GitHub 저장소에서 확인할 수 있습니다.
+            </p>
+            <a class="github-button" href="https://github.com/hpcDrone" target="_blank">
+              GitHub Repository 보기 →
+            </a>
+          </section>
+
+        <section class="section" id="etc">
+          <h2>06. Demo Video</h2>
+          <p>
+            자율 순찰 드론 웹 서비스의 동작 흐름을 확인할 수 있는 시연 영상입니다.
+          </p>
+          <div class="demo-video-box">
+            <video controls>
+              <source src="./drone-web-project/drone-demo.mp4" type="video/mp4" />
+              사용 중인 브라우저에서는 영상을 재생할 수 없습니다.
+            </video>
+          </div>
+        </section>
+
+        <div class="bottom-nav">
+          <a href="index.html" class="nav-button">← 포트폴리오로 돌아가기</a>
+          <a href="#top" class="nav-button">맨 위로 ↑</a>
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      © 2026 김유나. All rights reserved.
+    </footer>
+  </div>
+
+  <script>
+    function toggleRole(button) {
+      const card = button.closest(".role-card");
+      const isActive = card.classList.contains("active");
+      card.classList.toggle("active");
+      if (isActive) {
+        button.textContent = "더보기 ↓";
+      } else {
+        button.textContent = "접기 ↑";
+      }
+    }
+  </script>
+
+</body>
+</html>

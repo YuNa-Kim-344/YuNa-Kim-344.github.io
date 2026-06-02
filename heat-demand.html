@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>기상 빅데이터 기반 지역난방 열수요 예측</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Pretendard", "Noto Sans KR", Arial, sans-serif;
+      background: #faf9f6;
+      color: #2d2d2d;
+      line-height: 1.8;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1060px, 92%);
+      margin: 0 auto;
+      padding: 46px 0 90px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 34px;
+      color: #777;
+      font-size: 15px;
+      transition: 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #222;
+      transform: translateX(-3px);
+    }
+
+    .hero {
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 22px;
+      padding: 42px 46px;
+      margin-bottom: 34px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.035);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 6px 13px;
+      background: #eee7dc;
+      color: #6b5d4c;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .project-title {
+      font-size: 42px;
+      font-weight: 900;
+      color: #3f3f3f;
+      letter-spacing: -1.2px;
+      line-height: 1.25;
+      margin-bottom: 16px;
+    }
+
+    .project-summary {
+      font-size: 18px;
+      color: #5f5f5f;
+      max-width: 880px;
+      margin-bottom: 22px;
+    }
+
+    .project-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .meta-item {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .meta-item strong {
+      color: #333;
+      margin-right: 6px;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      padding: 6px 12px;
+      border-radius: 9px;
+      background: #f1ece4;
+      color: #555;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .presentation-image {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #eee6dc;
+      border-radius: 16px;
+      padding: 18px;
+      margin: 24px 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .presentation-image img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: 560px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: 12px;
+      border: 1px solid #eee6dc;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .content-layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 34px;
+      align-items: start;
+    }
+
+    .toc {
+      position: sticky;
+      top: 28px;
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.03);
+    }
+
+    .toc-title {
+      font-size: 16px;
+      font-weight: 900;
+      font-style: italic;
+      margin-bottom: 14px;
+    }
+
+    .toc a {
+      display: block;
+      color: #777;
+      font-size: 14px;
+      margin-bottom: 10px;
+      transition: 0.2s ease;
+    }
+
+    .toc a:hover {
+      color: #222;
+      padding-left: 4px;
+    }
+
+    .section {
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 18px;
+      padding: 34px 38px;
+      margin-bottom: 26px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.035);
+    }
+
+    .section h2 {
+      font-size: 25px;
+      font-weight: 900;
+      font-style: italic;
+      color: #3f3f3f;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee6dc;
+    }
+
+    .section h3 {
+      font-size: 20px;
+      margin: 22px 0 10px;
+      color: #3f3f3f;
+    }
+
+    .section p {
+      color: #444;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+
+    .section ul {
+      padding-left: 22px;
+    }
+
+    .section li {
+      margin-bottom: 10px;
+      color: #444;
+      font-size: 16px;
+    }
+
+    .highlight {
+      background: #fbfaf7;
+      border-left: 4px solid #8b7b66;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-top: 24px;
+      color: #4d4d4d;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .info-card,
+    .role-card,
+    .result-card {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 14px;
+      padding: 22px;
+    }
+
+    .info-card h3,
+    .role-card h3,
+    .result-card h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #3f3f3f;
+    }
+
+    .info-card p,
+    .role-card p,
+    .result-card p {
+      font-size: 15px;
+      color: #555;
+      margin: 0;
+    }
+
+    .flow-box {
+      background: #ffffff;
+      border: 1px solid #eee6dc;
+      border-radius: 16px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+
+    .flow-step {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      color: #444;
+      font-size: 15px;
+    }
+
+    .flow-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .flow-step strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .result-number {
+      font-size: 30px;
+      font-weight: 900;
+      color: #8b7b66;
+      margin-bottom: 8px;
+    }
+
+    .table-box {
+      width: 100%;
+      overflow-x: auto;
+      margin: 24px 0;
+      border-radius: 14px;
+      border: 1px solid #eee6dc;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      min-width: 640px;
+    }
+
+    th,
+    td {
+      padding: 13px 14px;
+      border-bottom: 1px solid #eee6dc;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background: #fbfaf7;
+      font-weight: 800;
+      color: #444;
+    }
+
+    td {
+      color: #555;
+    }
+
+    .source-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 18px;
+      background: #333;
+      color: #fff;
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .source-button:hover {
+      background: #8b7b66;
+      transform: translateY(-2px);
+    }
+
+    .bottom-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 40px;
+    }
+
+    .nav-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #333;
+      color: #fff;
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .nav-button:hover {
+      background: #8b7b66;
+      transform: translateY(-2px);
+    }
+
+    footer {
+      text-align: center;
+      color: #aaa;
+      font-size: 13px;
+      margin-top: 70px;
+    }
+
+    @media (max-width: 900px) {
+      .content-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .toc {
+        position: static;
+      }
+
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: 92%;
+        padding-top: 30px;
+      }
+
+      .hero {
+        padding: 32px 24px;
+      }
+
+      .project-title {
+        font-size: 30px;
+      }
+
+      .project-summary {
+        font-size: 16px;
+      }
+
+      .section {
+        padding: 28px 22px;
+      }
+
+      .bottom-nav {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <a href="index.html#heat-demand-card" class="back-link">← 포트폴리오로 돌아가기</a>
+
+    <header class="hero">
+      <span class="eyebrow">Project Detail</span>
+
+      <h1 class="project-title">기상 빅데이터 기반 지역난방 열수요 예측 모델</h1>
+
+      <p class="project-summary">
+        한국지역난방공사 19개 지사의 시간 단위 열수요 데이터와 기상 빅데이터를 결합하여,
+        시간·계절 주기성과 지사별 특성을 반영한 LSTM·GRU 기반 열수요 예측 모델을 구축했습니다.
+      </p>
+
+      <div class="project-meta">
+        <div class="meta-item"><strong>기간</strong>2025.05.10 ~ 2025.06.18</div>
+        <div class="meta-item"><strong>팀 구성</strong>2인</div>
+        <div class="meta-item"><strong>분야</strong>Time-Series Forecasting / Weather Big Data</div>
+      </div>
+
+      <div class="tag-list">
+        <span class="tag">Python</span>
+        <span class="tag">LSTM</span>
+        <span class="tag">GRU</span>
+        <span class="tag">Time Series</span>
+        <span class="tag">Feature Engineering</span>
+        <span class="tag">Correlation Analysis</span>
+        <span class="tag">Optuna</span>
+        <span class="tag">Weather Big Data</span>
+      </div>
+    </header>
+
+    <div class="content-layout">
+      <aside class="toc">
+        <p class="toc-title">CONTENTS</p>
+        <a href="#overview">01. Project Overview</a>
+        <a href="#motivation">02. Motivation & Goal</a>
+        <a href="#role">03. My Role</a>
+        <a href="#data">04. Data & Preprocessing</a>
+        <a href="#features">05. Feature Engineering</a>
+        <a href="#model">06. Model Design</a>
+        <a href="#results">07. Results</a>
+        <a href="#presentation">08. Presentation Materials</a>
+        <a href="#source">09. Source Code</a>
+      </aside>
+
+      <main>
+        <section class="section" id="overview">
+          <h2>01. Project Overview</h2>
+
+          <p>
+            본 프로젝트는 한국지역난방공사에서 제공한 19개 지사의 시간 단위 열수요 데이터와
+            기상청 기상 빅데이터를 융합하여 열수요를 예측하는 시계열 딥러닝 프로젝트입니다.
+          </p>
+
+          <p>
+            열수요는 외기온도, 습도, 강수량과 같은 기상 변수뿐 아니라 시간대, 요일, 계절,
+            지역별 사용 패턴에 따라 복합적으로 변화합니다. 따라서 단순 회귀 모델만으로는
+            이러한 시간 의존성과 지역별 차이를 충분히 반영하기 어렵습니다.
+          </p>
+
+          <p>
+            이에 본 프로젝트에서는 LSTM 및 GRU 기반 시계열 모델을 활용하고,
+            sin·cos 기반 주기성 파생변수와 지사 임베딩을 적용하여 현실적인 열수요 패턴을
+            학습할 수 있도록 설계했습니다.
+          </p>
+
+          <div class="highlight">
+            핵심은 기상 데이터와 시간 주기성, 지사별 특성을 함께 반영하여
+            실제 운영 환경에서 활용 가능한 수준의 시간 단위 열수요 예측 모델을 구축한 점입니다.
+          </div>
+        </section>
+
+        <section class="section" id="motivation">
+          <h2>02. Motivation & Goal</h2>
+
+          <h3>Research Motivation</h3>
+          <p>
+            본 프로젝트는 2025 날씨 빅데이터 콘테스트 참가를 목적으로 수행되었습니다.
+            지역난방 시스템에서 정확한 열수요 예측은 난방 에너지의 효율적 공급,
+            운영 비용 절감, 탄소 배출 저감 측면에서 매우 중요한 과제입니다.
+          </p>
+
+          <p>
+            기존 열수요 예측은 단순 온도 기반 회귀 모델이나 통계적 접근에 머무르는 경우가 많아,
+            시간대별 반복 패턴, 계절적 비대칭성, 지사별 사용 특성 차이를 충분히 반영하지 못하는 한계가 있습니다.
+          </p>
+
+          <h3>Research Goal</h3>
+          <ul>
+            <li>지역난방 열수요와 기상 데이터를 융합한 시간 단위 열수요 예측 모델 구축</li>
+            <li>19개 지사별 독립적인 시계열 특성을 반영한 데이터셋 설계</li>
+            <li>기상 변수와 시간 주기성을 고려한 파생변수 설계</li>
+            <li>LSTM 및 GRU 모델을 활용한 시계열 예측 성능 비교</li>
+            <li>Optuna 기반 하이퍼파라미터 최적화를 통한 성능 개선</li>
+          </ul>
+        </section>
+
+        <section class="section" id="role">
+          <h2>03. My Role</h2>
+
+          <div class="card-grid">
+            <div class="role-card">
+              <h3>Exploratory Data Analysis</h3>
+              <p>
+                지역난방 열수요 및 기상 빅데이터에 대한 탐색적 데이터 분석을 수행하고,
+                지사별·시간별 열수요 패턴을 확인했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>Data Preprocessing</h3>
+              <p>
+                결측치 처리, 시간 변수 분해, 지사별 시계열 구성 등 모델 학습을 위한
+                데이터 전처리 파이프라인을 구축했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>Correlation Analysis</h3>
+              <p>
+                Pearson 및 Spearman 상관관계 분석을 통해 열수요와 관련성이 높은 기상 변수를 선별하고,
+                다중공선성을 고려해 입력 변수를 선택했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>Feature Engineering</h3>
+              <p>
+                월, 일, 시간 정보를 sin·cos 변환하여 계절성과 일 단위 주기성을 반영한
+                파생변수를 설계했습니다.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="data">
+          <h2>04. Data & Preprocessing</h2>
+
+          <div class="card-grid">
+            <div class="info-card">
+              <h3>Data Source</h3>
+              <p>
+                한국지역난방공사 19개 지사 열수요 데이터와 기상청 기상 데이터를 활용했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Time Unit</h3>
+              <p>
+                시간 단위 데이터로 구성되어 있으며, 입력 시퀀스는 48시간 기준으로 생성했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Train / Test Split</h3>
+              <p>
+                2021~2022년 데이터를 학습 데이터로, 2023년 데이터를 테스트 데이터로 사용했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Target</h3>
+              <p>
+                종속변수는 시간 단위 열수요 값인 heat_demand입니다.
+              </p>
+            </div>
+          </div>
+
+          <h3>Preprocessing</h3>
+          <ul>
+            <li>99 값은 결측치로 판단하여 NaN 처리</li>
+            <li>일사량 변수는 결측률이 높아 제외</li>
+            <li>체감온도는 인접 시점 평균을 활용하여 보간</li>
+            <li>상대습도는 평균 보간 후 시계열 생성 과정에서 유효 데이터만 사용</li>
+            <li>tm 변수를 year, month, day, hour로 분리</li>
+          </ul>
+        </section>
+
+        <section class="section" id="features">
+          <h2>05. Feature Engineering</h2>
+
+          <p>
+            열수요는 단순히 현재 기온만으로 결정되지 않고, 계절성, 시간대, 요일,
+            지사별 사용 패턴의 영향을 함께 받습니다. 이를 반영하기 위해 통계적 분석과
+            주기성 파생변수 설계를 함께 수행했습니다.
+          </p>
+
+          <div class="flow-box">
+            <div class="flow-step">
+              <strong>Step 1. Correlation Analysis</strong>
+              Pearson 상관관계 분석 결과 기온과 체감온도는 열수요와 음의 상관관계를 보였으며,
+              다중공선성을 고려하여 체감온도를 주요 변수로 선택했습니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 2. Spearman Analysis</strong>
+              습도는 열수요와 유의미한 음의 상관관계를 보여 사용했으며,
+              풍속과 풍향은 상관관계가 낮아 제외했습니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 3. Cyclical Features</strong>
+              월, 일, 시간 정보를 sin·cos로 변환하여 계절성과 일 단위 주기성을 모델이 학습할 수 있도록 했습니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 4. Holiday Feature</strong>
+              holidays 라이브러리를 활용하여 주말·공휴일 여부를 이진 변수로 구성했습니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 5. Branch Embedding</strong>
+              지사별 열수요 분포 차이를 반영하기 위해 branch_id를 입력 변수로 사용하고,
+              모델에서 지사 임베딩을 적용했습니다.
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="model">
+          <h2>06. Model Design</h2>
+
+          <p>
+            본 프로젝트에서는 LSTM과 GRU 기반 시계열 딥러닝 모델을 구성하고,
+            지사별 특성을 반영하기 위해 branch_id 임베딩을 함께 활용했습니다.
+          </p>
+
+          <div class="card-grid">
+            <div class="info-card">
+              <h3>Input Sequence</h3>
+              <p>
+                48시간, 즉 2일 길이의 과거 시계열을 입력으로 사용했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Branch Embedding</h3>
+              <p>
+                branch_id를 4차원 임베딩 벡터로 변환하여 지사별 사용 특성을 학습하도록 했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>LSTM</h3>
+              <p>
+                장기 의존성을 학습하기 위해 LSTM 기반 예측 모델을 구성했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>GRU</h3>
+              <p>
+                상대적으로 간결한 구조의 GRU 모델을 함께 실험하여 LSTM과 성능을 비교했습니다.
+              </p>
+            </div>
+          </div>
+
+          <h3>Hyperparameter Tuning</h3>
+          <ul>
+            <li>Optuna 기반 Bayesian Optimization 사용</li>
+            <li>4-fold cross validation 적용</li>
+            <li>총 32회 학습을 통해 최적 하이퍼파라미터 탐색</li>
+            <li>LSTM 최적 설정: Cell 256 / 256, Batch size 512</li>
+            <li>GRU 최적 설정: Cell 128 / 256, Batch size 256</li>
+          </ul>
+        </section>
+
+        <section class="section" id="results">
+          <h2>07. Results</h2>
+
+          <div class="card-grid">
+            <div class="result-card">
+              <h3>LSTM R²</h3>
+              <div class="result-number">0.9950</div>
+              <p>
+                LSTM 모델은 가장 높은 설명력을 보이며 전반적으로 우수한 성능을 기록했습니다.
+              </p>
+            </div>
+
+            <div class="result-card">
+              <h3>LSTM RMSE</h3>
+              <div class="result-number">7.8052</div>
+              <p>
+                예측 오차 측면에서도 GRU보다 낮은 RMSE를 기록했습니다.
+              </p>
+            </div>
+
+            <div class="result-card">
+              <h3>GRU R²</h3>
+              <div class="result-number">0.9939</div>
+              <p>
+                GRU 역시 높은 예측 성능을 보였으나, LSTM보다 소폭 낮은 성능을 보였습니다.
+              </p>
+            </div>
+
+            <div class="result-card">
+              <h3>GRU RMSE</h3>
+              <div class="result-number">8.6103</div>
+              <p>
+                GRU의 RMSE는 LSTM보다 다소 높게 나타났습니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="table-box">
+            <table>
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>R²</th>
+                  <th>RMSE</th>
+                  <th>MAE</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>LSTM</td>
+                  <td>0.9950</td>
+                  <td>7.8052</td>
+                  <td>4.5357</td>
+                </tr>
+                <tr>
+                  <td>GRU</td>
+                  <td>0.9939</td>
+                  <td>8.6103</td>
+                  <td>4.9861</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="highlight">
+            시간 주기성 파생변수와 지사 임베딩이 예측 성능 향상에 크게 기여했으며,
+            LSTM 모델이 열수요의 계절성과 시간 의존성을 가장 효과적으로 학습했습니다.
+          </div>
+        </section>
+
+        <section class="section" id="presentation">
+          <h2>08. Presentation Materials</h2>
+        
+          <p>
+            프로젝트 발표에 사용한 주요 자료 이미지입니다. 데이터 전처리, 변수 선택, 모델 구조,
+            성능 평가 결과를 시각적으로 정리했습니다.
+          </p>
+        
+          <div class="presentation-image">
+            <img src="./LSTM/1.jpg" alt="열수요 예측 프로젝트 발표 자료 1" />
+            <img src="./LSTM/2.jpg" alt="열수요 예측 프로젝트 발표 자료 2" />
+            <img src="./LSTM/3.jpg" alt="열수요 예측 프로젝트 발표 자료 3" />
+            <img src="./LSTM/4.jpg" alt="열수요 예측 프로젝트 발표 자료 4" />
+            <img src="./LSTM/5.jpg" alt="열수요 예측 프로젝트 발표 자료 5" />
+            <img src="./LSTM/6.jpg" alt="열수요 예측 프로젝트 발표 자료 6" />
+            <img src="./LSTM/7.jpg" alt="열수요 예측 프로젝트 발표 자료 7" />
+            <img src="./LSTM/8.jpg" alt="열수요 예측 프로젝트 발표 자료 8" />
+            <img src="./LSTM/9.jpg" alt="열수요 예측 프로젝트 발표 자료 9" />
+            <img src="./LSTM/10.jpg" alt="열수요 예측 프로젝트 발표 자료 10" />
+          </div>
+        </section>
+
+        <section class="section" id="source">
+          <h2>09. Source Code</h2>
+          <p>
+            프로젝트 구현 코드는 아래 GitHub 저장소에서 확인할 수 있습니다.
+          </p>
+          <a class="source-button" href="https://github.com/YuNa-Kim-344/ML_LSTM_Heat-demand-forecast" target="_blank">
+            GitHub Repository 보기 →
+          </a>
+        
+        </section>
+
+        <div class="bottom-nav">
+          <a href="index.html#heat-demand-card" class="nav-button">← 포트폴리오로 돌아가기</a>
+          <a href="#" class="nav-button">맨 위로 ↑</a>
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      © 2026 김유나. All rights reserved.
+    </footer>
+  </div>
+</body>
+</html>

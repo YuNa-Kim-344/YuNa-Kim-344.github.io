@@ -1,1 +1,998 @@
-hello!
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>김유나 Portfolio</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Pretendard", "Noto Sans KR", Arial, sans-serif;
+      background: #faf9f6;
+      color: #2d2d2d;
+      line-height: 1.7;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1180px, 92%);
+      margin: 0 auto;
+      padding: 46px 0 80px;
+    }
+
+    .page-title {
+      font-size: 38px;
+      font-weight: 800;
+      margin-bottom: 36px;
+      color: #4a4a4a;
+      letter-spacing: -1px;
+    }
+
+    .top-layout {
+      display: grid;
+      grid-template-columns: 330px 1fr;
+      gap: 42px;
+      align-items: start;
+      margin-bottom: 70px;
+    }
+
+    .profile-area {
+      position: sticky;
+      top: 30px;
+    }
+
+    .profile-card,
+    .link-card,
+    .resume-card,
+    .skill-card,
+    .project-card {
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 16px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.035);
+    }
+
+    .profile-card {
+      padding: 28px;
+      margin-bottom: 26px;
+    }
+
+    .side-title {
+      font-size: 21px;
+      font-weight: 800;
+      font-style: italic;
+      text-decoration: underline;
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+
+    .profile-img {
+      width: 210px;
+      height: 260px;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 28px;
+      background: #f2f2f2;
+      border-radius: 4px;
+    }
+
+    .intro {
+      border-left: 3px solid #222;
+      padding-left: 16px;
+      margin-bottom: 22px;
+      font-size: 15px;
+    }
+
+    .profile-info p {
+      margin-bottom: 13px;
+      font-size: 15px;
+    }
+
+    .profile-info .label {
+      font-weight: 800;
+      font-style: italic;
+      margin-right: 8px;
+    }
+
+    .links-title {
+      font-size: 26px;
+      font-weight: 800;
+      font-style: italic;
+      margin: 0 0 14px;
+    }
+
+    .link-card {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      transition: 0.22s ease;
+    }
+
+    .link-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .link-text {
+      padding: 16px 18px;
+      flex: 1;
+    }
+
+    .link-text h3 {
+      font-size: 15px;
+      margin-bottom: 5px;
+    }
+
+    .link-text p {
+      font-size: 12px;
+      color: #777;
+      word-break: break-all;
+    }
+
+    .link-thumb {
+      width: 104px;
+      min-height: 74px;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+
+    .main-area {
+      min-width: 0;
+    }
+
+    .section-heading {
+      font-size: 24px;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: 1px;
+      margin: 0 0 18px;
+      padding-top: 18px;
+      border-top: 2px solid #e6e0d8;
+    }
+
+    .resume-card {
+      padding: 30px 34px;
+      margin-bottom: 30px;
+    }
+
+    .resume-block {
+      margin-bottom: 28px;
+    }
+
+    .resume-block:last-child {
+      margin-bottom: 0;
+    }
+
+    .resume-block h3 {
+      font-size: 17px;
+      margin-bottom: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .resume-block h3::before {
+      content: "✎";
+      font-size: 18px;
+    }
+
+    .resume-item {
+      margin-left: 27px;
+      margin-bottom: 10px;
+      font-size: 15px;
+      color: #333;
+    }
+
+    .date {
+      color: #777;
+      margin-right: 8px;
+      white-space: nowrap;
+    }
+
+    .skill-card {
+      padding: 26px 30px;
+    }
+
+    .skill-desc {
+      font-size: 14px;
+      color: #777;
+      margin-bottom: 18px;
+      font-style: italic;
+    }
+
+    .skill-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .skill-group {
+      background: #fbfaf7;
+      border: 1px solid #ece6dd;
+      border-radius: 12px;
+      padding: 13px;
+    }
+
+    .skill-group-title {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .skill-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .skill {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      background: #f1ece4;
+      color: #444;
+    }
+
+    .skill.green {
+      background: #dcebe1;
+    }
+
+    .skill.pink {
+      background: #f2dce3;
+    }
+
+    .skill.blue {
+      background: #dce7f2;
+    }
+
+    .skill.yellow {
+      background: #f2e8cc;
+    }
+
+    .divider {
+      height: 1px;
+      background: #e8e1d8;
+      margin: 70px 0 42px;
+    }
+
+    .projects-title {
+      font-size: 38px;
+      font-weight: 900;
+      margin-bottom: 30px;
+      color: #4a4a4a;
+    }
+
+    .project-list {
+      display: flex;
+      flex-direction: column;
+      gap: 26px;
+    }
+
+    .project-card {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      overflow: hidden;
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+
+    .project-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.08);
+    }
+
+    .project-image {
+      min-height: 240px;
+      background: linear-gradient(135deg, #e8eef7, #f7efe7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: #777;
+      text-align: center;
+      font-size: 15px;
+    }
+
+    .project-image img {
+      width: 100%;
+      height: 100%;
+      max-height: 270px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .project-content {
+      padding: 34px 36px;
+    }
+
+    .project-content h3 {
+      font-size: 25px;
+      margin-bottom: 12px;
+      color: #4a4a4a;
+    }
+
+    .project-one-liner {
+      font-size: 17px;
+      color: #666;
+      margin-bottom: 18px;
+      line-height: 1.8;
+    }
+
+    .project-meta {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 16px;
+    }
+
+    .project-role {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 16px;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .tag {
+      padding: 5px 11px;
+      border-radius: 8px;
+      background: #eee7dc;
+      color: #555;
+      font-size: 13px;
+    }
+
+    .more-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: none;
+      background: #333;
+      color: #fff;
+      border-radius: 999px;
+      padding: 8px 15px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .project-detail {
+      display: none;
+      grid-column: 1 / -1;
+      padding: 0 36px 34px;
+      background: #fff;
+    }
+
+    .project-detail-inner {
+      border-top: 1px solid #eee5dc;
+      padding-top: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 26px;
+    }
+
+    .detail-box {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .detail-box h4 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .detail-box ul {
+      padding-left: 20px;
+    }
+
+    .detail-box li {
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #444;
+    }
+
+    .project-card.active .project-detail {
+      display: block;
+    }
+
+    .project-card.active .more-btn {
+      background: #8b7b66;
+    }
+
+    footer {
+      margin-top: 70px;
+      text-align: center;
+      font-size: 13px;
+      color: #aaa;
+    }
+
+    @media (max-width: 980px) {
+      .top-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-area {
+        position: static;
+      }
+
+      .profile-card {
+        text-align: left;
+      }
+
+      .skill-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .project-card {
+        grid-template-columns: 1fr;
+      }
+
+      .project-detail-inner {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: 92%;
+        padding-top: 30px;
+      }
+
+      .page-title,
+      .projects-title {
+        font-size: 30px;
+      }
+
+      .resume-card,
+      .skill-card,
+      .project-content {
+        padding: 24px 20px;
+      }
+
+      .project-detail {
+        padding: 0 20px 24px;
+      }
+
+      .resume-item {
+        margin-left: 8px;
+      }
+
+      .date {
+        display: block;
+        margin-bottom: 2px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1 class="page-title">김유나의 포트폴리오</h1>
+
+    <section class="top-layout">
+      <aside class="profile-area">
+        <div class="profile-card">
+          <h2 class="side-title">PROFILE</h2>
+
+          <img src="yuna_profile.jpg" alt="프로필 사진" class="profile-img" />
+
+          <p class="intro">안녕하세요 김유나 입니다 :)</p>
+
+          <div class="profile-info">
+            <p><span class="label">Name:</span> 김유나</p>
+            <p><span class="label">Mail:</span> rladbsk2805@naver.com</p>
+            <p><span class="label">Tel:</span> 010-2064-1805</p>
+          </div>
+        </div>
+
+        <h2 class="links-title">Links</h2>
+
+        <a class="link-card" href="https://github.com/YuNa-Kim-344" target="_blank">
+          <div class="link-text">
+            <h3>GitHub</h3>
+            <p>https://github.com/YuNa-Kim-344</p>
+          </div>
+          <div class="link-thumb">👻</div>
+        </a>
+
+        <a class="link-card" href="https://hpclab.hongik.ac.kr/" target="_blank">
+          <div class="link-text">
+            <h3>HPC LAB</h3>
+            <p>https://hpclab.hongik.ac.kr/</p>
+          </div>
+          <div class="link-thumb">📖</div>
+        </a>
+
+        
+      </aside>
+
+      <main class="main-area">
+        <h2 class="section-heading">RESUME</h2>
+
+        <div class="resume-card">
+          <div class="resume-block">
+            <h3>학력</h3>
+            <p class="resume-item">
+              <span class="date">(2022.03 ~ 현재)</span>
+              홍익대학교 소프트웨어융합학과
+            </p>
+          </div>
+
+          <div class="resume-block">
+            <h3>자격증</h3>
+            <p class="resume-item">
+              <span class="date">(2025.12)</span>
+              OPIc
+            </p>
+            <p class="resume-item">
+              <span class="date">(2026.03)</span>
+              SQLD
+            </p>
+          </div>
+
+          <div class="resume-block">
+            <h3>연구 경험</h3>
+            <p class="resume-item">
+              <span class="date">(2024.06 ~ 2025.12)</span>
+              홍익대학교 High-Performance Data Processing & Analysis Lab 학부 연구생
+            </p>
+            <p class="resume-item">
+              <span class="date">(2024.09 ~ 2024.12)</span>
+              바이오헬스 UROP 연구 수행
+            </p>
+            <p class="resume-item">
+              <span class="date">(2025.09 ~ 2025.12)</span>
+              UROP 연구 수행
+            </p>
+          </div>
+
+          <div class="resume-block">
+            <h3>연구 성과</h3>
+            <p class="resume-item">
+              <span class="date">(2025.05)</span>
+              대한전자공학회 하계 학술대회 논문 채택
+            </p>
+            <p class="resume-item">
+              <span class="date">(2025.10)</span>
+              대한전자공학회 추계 학술대회 논문 채택
+            </p>
+          </div>
+
+          <div class="resume-block">
+            <h3>대외 활동</h3>
+            <p class="resume-item">
+              <span class="date">(2024.12)</span>
+              디지털 바이오헬스 종합 설계 경진대회 참가
+            </p>
+            <p class="resume-item">
+              <span class="date">(2025.03 ~ 2025.05)</span>
+              자기주도학습 동아리 활동
+            </p>
+            <p class="resume-item">
+              <span class="date">(2025.09 ~ 2025.12)</span>
+              세종시 그랜드 캡스톤 참가
+            </p>
+          </div>
+
+          <div class="resume-block">
+            <h3>수상</h3>
+            <p class="resume-item">
+              <span class="date">(2025.11)</span>
+              소프트웨어융합학과 제 2회 학술제 수상
+            </p>
+          </div>
+        </div>
+
+        <h2 class="section-heading">SKILL</h2>
+        <div class="skill-card">
+
+            <p class="skill-desc">
+                각 기술의 활용도를 최대 3개의 ⭐로 표시하며, 각각 상/중/하 를 나타냅니다.
+            </p>
+              
+          <div class="skill-grid">
+            <div class="skill-group">
+              <p class="skill-group-title">언어 및 프레임워크</p>
+              <div class="skill-list">
+                <span class="skill green">Python <span class="stars">⭐⭐⭐</span></span>
+                <span class="skill green">Java <span class="stars">⭐⭐⭐</span></span>
+                <span class="skill green">Spring Boot <span class="stars">⭐⭐⭐</span></span>
+                <span class="skill green">FastAPI <span class="stars">⭐⭐</span></span>
+                <span class="skill green">C <span class="stars">⭐</span></span>
+                <span class="skill green">HTML <span class="stars">⭐⭐</span></span>
+                <span class="skill green">CSS <span class="stars">⭐⭐</span></span>
+              </div>
+            </div>
+
+            <div class="skill-group">
+              <p class="skill-group-title">데이터베이스 / 서버</p>
+              <div class="skill-list">
+                <span class="skill yellow">MariaDB <span class="stars">⭐⭐⭐</span></span>
+                <span class="skill yellow">MySQL <span class="stars">⭐⭐⭐</span></span>
+                <span class="skill yellow">SQL <span class="stars">⭐⭐⭐</span></span>
+                <span class="skill yellow">Docker <span class="stars">⭐⭐</span></span>
+                <span class="skill yellow">Linux <span class="stars">⭐⭐</span></span>
+                <span class="skill yellow">Git <span class="stars">⭐⭐</span></span>
+              </div>
+            </div>
+
+            <div class="skill-group">
+              <p class="skill-group-title">기타</p>
+              <div class="skill-list">
+                <span class="skill pink">Machine Learning <span class="stars">⭐⭐⭐</span></span>
+                <span class="skill pink">Computer Vision <span class="stars">⭐⭐⭐</span></span>
+                <span class="skill pink">YOLO <span class="stars">⭐⭐</span></span>
+                <span class="skill pink">Data Analysis <span class="stars">⭐⭐⭐</span></span>
+                <span class="skill pink">LLM <span class="stars">⭐⭐⭐</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </section>
+
+    <div class="divider"></div>
+
+    <section id="projects">
+      <h2 class="projects-title">PROJECT</h2>
+
+      <div class="project-list">
+
+        <!--    프로젝트    -->
+
+        <article id="drone-web-card" class="project-card" onclick="location.href='drone-web-project.html'">
+            <div class="project-image">
+              <img src="./drone-web-project/drone-project.jpg" alt="순찰 드론 서비스 웹페이지 이미지" />
+            </div>
+          
+            <div class="project-content">
+              <h3>자율 순찰 드론 서비스 웹페이지 구현</h3>
+          
+              <p class="project-one-liner">
+                관리자가 드론을 활용해 원하는 지역을 자율 순찰할 수 있도록 지원하는 웹 서비스를 구현했습니다.
+              </p>
+          
+              <p class="project-meta">
+                2025.03 ~ 2025.06
+              </p>
+              <p class="project-role">
+                UI Design / Backend / DB / Server Integration / Deployment
+              </p>
+          
+            <div class="tag-list">
+                <span class="tag">ERD</span>
+                <span class="tag">Spring Boot</span>
+                <span class="tag">MariaDB</span>
+                <span class="tag">FastAPI</span>
+                <span class="tag">Jetson</span>
+                <span class="tag">Docker</span>
+            </div>
+        
+            <button class="more-btn" type="button">자세히 보기 →</button>
+        </div>
+        </article> 
+
+        <!--    프로젝트    -->
+
+        <article id="drone-card" class="project-card" onclick="location.href='drone-project.html'">
+            <div class="project-image">
+                <img src="./drone/drone.jpg" alt="순찰 드론 이미지" />
+            </div>
+            
+            <div class="project-content">
+                <h3>실시간 폭행-실신 감지 및 자연어 보고 순찰 드론</h3>
+            
+                <p class="project-one-liner">
+                    드론에 Jetson과 카메라를 탑재하여 자율 주행 중 수집한 영상을 폭행·실신·정상 상황으로 분류하고,
+                    이상상황 발생 시 5초 영상과 상황 설명 텍스트를 관리자에게 전송하는 AI 기반 순찰 시스템을 구현했습니다.
+                </p>
+            
+                <p class="project-meta">
+                2025.03 ~ 2025.06
+                </p>
+                <p class="project-role">
+                    Data Preprocessing / VLM Fine-tuning & Situation Text Generation
+                </p>
+            
+                <div class="tag-list">
+                    <span class="tag">Python</span>
+                    <span class="tag">Data Preprocessing</span>
+                    <span class="tag">VLM</span>
+                    <span class="tag">Fine-tuning</span>
+                    <span class="tag">Video Understanding</span>
+                    <span class="tag">Violence Detection</span>
+                    <span class="tag">Fall Detection</span>
+                    <span class="tag">Text Generation</span>
+                  </div>
+            
+                <button class="more-btn" type="button">자세히 보기 →</button>
+            </div>
+        </article> 
+
+        <!--    프로젝트    -->
+
+        <article id="medical-llm-card" class="project-card" onclick="location.href='medical-llm.html'">
+            <div class="project-image">
+              <img src="./LLM/0.jpg" alt="LLM 기반 의료진 보조 처방 시스템 프로젝트 이미지" />
+            </div>
+          
+            <div class="project-content">
+              <h3>LLM 기반 의료진 보조 처방 시스템</h3>
+          
+              <p class="project-one-liner">
+                환자의 진단 정보를 기반으로 적절한 처방 약물 리스트를 생성하는 LLM 기반 의료진 보조 시스템을 구축하고,
+                MIMIC-IV 데이터 전처리, 프롬프트 구성, Llama3.1-8B-Instruct 파인튜닝, FlashAttention2 적용,
+                Human/GPT-4 기반 평가를 수행한 프로젝트입니다.
+              </p>
+          
+              <p class="project-meta">
+                2025.03 ~ 2025.06
+              </p>
+          
+              <p class="project-role">
+                Data Preprocessing / Prompt Design / LLM Fine-tuning / FlashAttention2 / Human & GPT-4 Evaluation / Result Analysis
+              </p>
+          
+              <div class="tag-list">
+                <span class="tag">Python</span>
+                <span class="tag">LLM</span>
+                <span class="tag">Llama3.1</span>
+                <span class="tag">Medical Data</span>
+                <span class="tag">MIMIC-IV</span>
+                <span class="tag">Prompt Design</span>
+                <span class="tag">FA-LoRA</span>
+                <span class="tag">FlashAttention2</span>
+                <span class="tag">GPT-4 Evaluation</span>
+              </div>
+          
+              <button class="more-btn" type="button">자세히 보기 →</button>
+            </div>
+          </article>
+
+        <!--    프로젝트    -->
+
+        <article id="heat-demand-card" class="project-card" onclick="location.href='heat-demand.html'">
+            <div class="project-image">
+              <img src="./LSTM/LSTM.jpg" alt="지역난방 열수요 예측 프로젝트 이미지" />
+            </div>
+          
+            <div class="project-content">
+              <h3>기상 빅데이터 기반 지역난방 열수요 예측</h3>
+          
+              <p class="project-one-liner">
+                2025 날씨 빅데이터 콘테스트 참가 프로젝트로, 지역난방 열수요와 기상 빅데이터를 융합하여 
+                시간·계절 주기성과 지사별 특성을 반영한 LSTM·GRU 기반 시간 단위 열수요 예측 모델을 구축했습니다.
+              </p>
+          
+              <p class="project-meta">
+                2025.05.10 ~ 2025.06.18
+              </p>
+          
+              <p class="project-role">
+                Data Preprocessing / Feature Engineering / Correlation Analysis / Time-Series Modeling
+              </p>
+          
+              <div class="tag-list">
+                <span class="tag">Python</span>
+                <span class="tag">Time Series</span>
+                <span class="tag">LSTM</span>
+                <span class="tag">GRU</span>
+                <span class="tag">Feature Engineering</span>
+                <span class="tag">Correlation Analysis</span>
+                <span class="tag">Optuna</span>
+                <span class="tag">Weather Big Data</span>
+              </div>
+          
+              <button class="more-btn" type="button">자세히 보기 →</button>
+            </div>
+          </article>
+
+           <!--    프로젝트   -->
+
+        <article id="patchcore-card" class="project-card" onclick="location.href='patchcore.html'">
+            <div class="project-image">
+            <img src="./patchcore/patchcore.jpg" alt="PatchCore 이미지 이상탐지 프로젝트 이미지" />
+            </div>
+        
+            <div class="project-content">
+            <h3>PatchCore 기반 이미지 이상탐지 논문 재현</h3>
+        
+            <p class="project-one-liner">
+                비지도 이미지 이상탐지 논문 PatchCore를 분석하고, 공식 구현 코드를 기반으로 알고리즘의 동작 원리를 이해한 뒤
+                실제 데이터셋에 적용하여 anomaly score와 anomaly map을 확인한 재현 실험 프로젝트입니다.
+            </p>
+        
+            <p class="project-meta">
+                2024.05.10 ~ 2024.07.02
+            </p>
+        
+            <p class="project-role">
+                Paper Study / Reproduction / Image Anomaly Detection / Experiment Analysis
+            </p>
+        
+            <div class="tag-list">
+                <span class="tag">Python</span>
+                <span class="tag">Computer Vision</span>
+                <span class="tag">Anomaly Detection</span>
+                <span class="tag">PatchCore</span>
+                <span class="tag">Unsupervised Learning</span>
+                <span class="tag">Paper Reproduction</span>
+                <span class="tag">Anomaly Map</span>
+            </div>
+        
+            <button class="more-btn" type="button">자세히 보기 →</button>
+            </div>
+        </article>
+
+        <!--    프로젝트    -->
+
+        <article id="heft-card" class="project-card" onclick="location.href='heft.html'">
+            <div class="project-image">
+              <img src="./HEFT/HEFT.jpg" alt="HEFT 기반 모델 학습 최적화 프로젝트 이미지" />
+            </div>
+          
+            <div class="project-content">
+              <h3>HEFT 기반 모델 학습 최적화 실험</h3>
+          
+              <p class="project-one-liner">
+                이기종 GPU 환경에서 LLM 학습 시간을 단축하기 위해 HEFT 스케줄링 알고리즘을 구현·검증하고,
+                실제 다중 GPU 학습에 적용하여 기존 AUTO 분할 대비 약 3시간의 학습 시간 단축을 확인한 프로젝트입니다.
+              </p>
+          
+              <p class="project-meta">
+                2024.08.01 ~ 2024.09.30
+              </p>
+          
+              <p class="project-role">
+                HEFT Algorithm Implementation / GPU Scheduling / LLM Layer Placement / Experiment Analysis
+              </p>
+          
+              <div class="tag-list">
+                <span class="tag">Python</span>
+                <span class="tag">Llama</span>
+                <span class="tag">LLM</span>
+                <span class="tag">HEFT</span>
+                <span class="tag">GPU Scheduling</span>
+                <span class="tag">Multi-GPU</span>
+                <span class="tag">DAG</span>
+                <span class="tag">Optimization</span>
+              </div>
+          
+              <button class="more-btn" type="button">자세히 보기 →</button>
+            </div>
+          </article>
+
+        <!--    프로젝트    -->
+
+          <article id="load-balancer-card" class="project-card" onclick="location.href='load-balancer.html'">
+            <div class="project-image">
+              <img src="./RR/RR.jpg" alt="L4 Load Balancer 프로젝트 이미지" />
+            </div>
+          
+            <div class="project-content">
+              <h3>Round Robin 기반 L4 Load Balancer 구현과 성능 비교</h3>
+          
+              <p class="project-one-liner">
+                Round Robin 알고리즘을 적용한 L4 Load Balancer를 직접 구현하고,
+                로드밸런싱 적용 여부에 따른 요청 성공률, 응답 시간, 서버별 부하 분산 차이를
+                네트워크 시뮬레이션 환경에서 비교 분석한 프로젝트입니다.
+              </p>
+          
+              <p class="project-meta">
+                2024.11.13 ~ 2024.12.02
+              </p>
+          
+              <p class="project-role">
+                Network Simulation Integration / Experiment Design / Performance Analysis
+              </p>
+          
+              <div class="tag-list">
+                <span class="tag">Python</span>
+                <span class="tag">Socket Programming</span>
+                <span class="tag">L4 Load Balancing</span>
+                <span class="tag">Round Robin</span>
+                <span class="tag">Network Simulation</span>
+                <span class="tag">TCP/IP</span>
+                <span class="tag">RIP Routing</span>
+              </div>
+          
+              <button class="more-btn" type="button">자세히 보기 →</button>
+            </div>
+          </article>
+
+        <!--    프로젝트    -->
+
+          <article id="medical-ml-card" class="project-card" onclick="location.href='DS_medical-ml.html'">
+            <div class="project-image">
+              <img src="./DS-ML/0.jpg" alt="처방 약물 예측 모델 성능 비교 프로젝트 이미지" />
+            </div>
+          
+            <div class="project-content">
+              <h3>처방 약물 예측 모델 성능 비교</h3>
+          
+              <p class="project-one-liner">
+                MIMIC-IV 의료 데이터를 기반으로 환자 정보와 진단에 맞는 처방 약물 예측 문제를 정의하고,
+                로지스틱 회귀, LASSO, LDA, Random Forest, SVM 등 다양한 머신러닝 모델의 성능을 비교·분석한 프로젝트입니다.
+              </p>
+          
+              <p class="project-meta">
+                2024.11.14 ~ 2024.12.16
+              </p>
+          
+              <p class="project-role">
+                Data Preprocessing / Model Training / Performance Comparison / Result Analysis
+              </p>
+          
+              <div class="tag-list">
+                <span class="tag">Python</span>
+                <span class="tag">R</span>
+                <span class="tag">Machine Learning</span>
+                <span class="tag">Medical Data</span>
+                <span class="tag">MIMIC-IV</span>
+                <span class="tag">Random Forest</span>
+                <span class="tag">SVM</span>
+                <span class="tag">LDA</span>
+                <span class="tag">Logistic Regression</span>
+              </div>
+          
+              <button class="more-btn" type="button">자세히 보기 →</button>
+            </div>
+          </article>
+
+
+
+
+        
+      </div>
+    </section>
+
+
+    <footer>
+      © 2026 김유나. All rights reserved.
+    </footer>
+  </div>
+
+  <script>
+    function toggleProject(card) {
+      const isActive = card.classList.contains("active");
+
+      document.querySelectorAll(".project-card").forEach((item) => {
+        item.classList.remove("active");
+        const button = item.querySelector(".more-btn");
+        if (button) button.textContent = "더 보기 →";
+      });
+
+      if (!isActive) {
+        card.classList.add("active");
+        const button = card.querySelector(".more-btn");
+        if (button) button.textContent = "접기 ↑";
+      }
+    }
+  </script>
+</body>
+</html>

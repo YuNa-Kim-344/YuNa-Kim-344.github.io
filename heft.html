@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HEFT 기반 모델 학습 최적화 실험</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Pretendard", "Noto Sans KR", Arial, sans-serif;
+      background: #faf9f6;
+      color: #2d2d2d;
+      line-height: 1.8;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1060px, 92%);
+      margin: 0 auto;
+      padding: 46px 0 90px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 34px;
+      color: #777;
+      font-size: 15px;
+      transition: 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #222;
+      transform: translateX(-3px);
+    }
+
+    .hero {
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 22px;
+      padding: 42px 46px;
+      margin-bottom: 34px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.035);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 6px 13px;
+      background: #eee7dc;
+      color: #6b5d4c;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .project-title {
+      font-size: 42px;
+      font-weight: 900;
+      color: #3f3f3f;
+      letter-spacing: -1.2px;
+      line-height: 1.25;
+      margin-bottom: 16px;
+    }
+
+    .project-summary {
+      font-size: 18px;
+      color: #5f5f5f;
+      max-width: 880px;
+      margin-bottom: 22px;
+    }
+
+    .project-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .meta-item {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .meta-item strong {
+      color: #333;
+      margin-right: 6px;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      padding: 6px 12px;
+      border-radius: 9px;
+      background: #f1ece4;
+      color: #555;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .content-layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 34px;
+      align-items: start;
+    }
+
+    .toc {
+      position: sticky;
+      top: 28px;
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.03);
+    }
+
+    .toc-title {
+      font-size: 16px;
+      font-weight: 900;
+      font-style: italic;
+      margin-bottom: 14px;
+    }
+
+    .toc a {
+      display: block;
+      color: #777;
+      font-size: 14px;
+      margin-bottom: 10px;
+      transition: 0.2s ease;
+    }
+
+    .toc a:hover {
+      color: #222;
+      padding-left: 4px;
+    }
+
+    .section {
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 18px;
+      padding: 34px 38px;
+      margin-bottom: 26px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.035);
+    }
+
+    .section h2 {
+      font-size: 25px;
+      font-weight: 900;
+      font-style: italic;
+      color: #3f3f3f;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee6dc;
+    }
+
+    .section h3 {
+      font-size: 20px;
+      margin: 22px 0 10px;
+      color: #3f3f3f;
+    }
+
+    .section p {
+      color: #444;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+
+    .section ul {
+      padding-left: 22px;
+    }
+
+    .section li {
+      margin-bottom: 10px;
+      color: #444;
+      font-size: 16px;
+    }
+
+    .highlight {
+      background: #fbfaf7;
+      border-left: 4px solid #8b7b66;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-top: 24px;
+      color: #4d4d4d;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .info-card,
+    .role-card,
+    .result-card {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 14px;
+      padding: 22px;
+    }
+
+    .info-card h3,
+    .role-card h3,
+    .result-card h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #3f3f3f;
+    }
+
+    .info-card p,
+    .role-card p,
+    .result-card p {
+      font-size: 15px;
+      color: #555;
+      margin: 0;
+    }
+
+    .result-number {
+      font-size: 30px;
+      font-weight: 900;
+      color: #8b7b66;
+      margin-bottom: 8px;
+    }
+
+    .flow-box {
+      background: #ffffff;
+      border: 1px solid #eee6dc;
+      border-radius: 16px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+
+    .flow-step {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      color: #444;
+      font-size: 15px;
+    }
+
+    .flow-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .flow-step strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .table-box {
+      width: 100%;
+      overflow-x: auto;
+      margin: 24px 0;
+      border-radius: 14px;
+      border: 1px solid #eee6dc;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      min-width: 640px;
+    }
+
+    th,
+    td {
+      padding: 13px 14px;
+      border-bottom: 1px solid #eee6dc;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background: #fbfaf7;
+      font-weight: 800;
+      color: #444;
+    }
+
+    td {
+      color: #555;
+    }
+
+    .presentation-image {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #eee6dc;
+      border-radius: 16px;
+      padding: 18px;
+      margin: 24px 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .presentation-image img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: 560px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: 12px;
+      border: 1px solid #eee6dc;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .source-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 18px;
+      background: #333;
+      color: #fff;
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .source-button:hover {
+      background: #8b7b66;
+      transform: translateY(-2px);
+    }
+
+    .bottom-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 40px;
+    }
+
+    .nav-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #333;
+      color: #fff;
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .nav-button:hover {
+      background: #8b7b66;
+      transform: translateY(-2px);
+    }
+
+    .image-box {
+        width: 100%;
+        background: #ffffff;
+        border: 1px solid #eee6dc;
+        border-radius: 16px;
+        padding: 18px;
+        margin: 24px 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .image-box img {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        max-height: 560px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+        border-radius: 12px;
+        border: 1px solid #eee6dc;
+        background: #fff;
+        padding: 8px;
+    }
+
+    .image-caption {
+        font-size: 14px;
+        color: #777;
+        text-align: center;
+        margin-top: -4px;
+    }
+
+    footer {
+      text-align: center;
+      color: #aaa;
+      font-size: 13px;
+      margin-top: 70px;
+    }
+
+    @media (max-width: 900px) {
+      .content-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .toc {
+        position: static;
+      }
+
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: 92%;
+        padding-top: 30px;
+      }
+
+      .hero {
+        padding: 32px 24px;
+      }
+
+      .project-title {
+        font-size: 30px;
+      }
+
+      .project-summary {
+        font-size: 16px;
+      }
+
+      .section {
+        padding: 28px 22px;
+      }
+
+      .bottom-nav {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <a href="index.html#heft-card" class="back-link">← 포트폴리오로 돌아가기</a>
+
+    <header class="hero">
+      <span class="eyebrow">Project Detail</span>
+
+      <h1 class="project-title">HEFT 기반 모델 학습 최적화 실험</h1>
+
+      <p class="project-summary">
+        이기종 GPU 환경에서 LLM 학습 시간을 단축하기 위해 HEFT 스케줄링 알고리즘을 직접 구현하고,
+        LLM 레이어 구조를 DAG로 모델링한 뒤 실제 다중 GPU 학습 환경에 적용하여 기존 AUTO 분할 대비
+        약 3시간의 학습 시간 단축을 확인한 프로젝트입니다.
+      </p>
+
+      <div class="project-meta">
+        <div class="meta-item"><strong>기간</strong>2024.08.01 ~ 2024.09.30</div>
+        <div class="meta-item"><strong>형태</strong>개인 프로젝트</div>
+        <div class="meta-item"><strong>역할</strong>End-to-End Ownership</div>
+      </div>
+
+      <div class="tag-list">
+        <span class="tag">Python</span>
+        <span class="tag">Llama</span>
+        <span class="tag">LLM</span>
+        <span class="tag">HEFT</span>
+        <span class="tag">GPU Scheduling</span>
+        <span class="tag">Multi-GPU</span>
+        <span class="tag">DAG</span>
+        <span class="tag">Optimization</span>
+      </div>
+    </header>
+
+    <div class="content-layout">
+      <aside class="toc">
+        <p class="toc-title">CONTENTS</p>
+        <a href="#overview">01. Project Overview</a>
+        <a href="#motivation">02. Motivation & Goal</a>
+        <a href="#role">03. My Role</a>
+        <a href="#heft">04. HEFT Algorithm</a>
+        <a href="#environment">05. GPU Environment</a>
+        <a href="#model">06. Model & DAG Design</a>
+        <a href="#experiment">07. Experiment Results</a>
+        <a href="#verification">08. Code Verification</a>
+        <a href="#source">09. Source Code</a>
+      </aside>
+
+      <main>
+        <section class="section" id="overview">
+          <h2>01. Project Overview</h2>
+
+          <p>
+            본 프로젝트는 성능이 서로 다른 GPU가 함께 사용되는 이기종 GPU 환경에서
+            대규모 LLM 학습을 더 효율적으로 수행하는 방법을 탐구한 시스템 최적화 프로젝트입니다.
+          </p>
+
+          <p>
+            연구실 환경에서는 Ada 6000 1대와 RTX 3090 2대를 동시에 사용할 수 있었지만,
+            기존 AUTO 레이어 분할 방식이 항상 최적의 학습 시간을 보장하지는 않았습니다.
+            이에 HEFT 스케줄링 알고리즘을 직접 구현하고, LLM의 레이어 구조를 DAG 형태로 모델링하여
+            GPU별 레이어 배치 방식을 실험했습니다.
+          </p>
+
+          <div class="highlight">
+            핵심은 새로운 모델을 설계한 것이 아니라, 기존 LLM 학습 과정에서 GPU 성능 차이와 레이어 간 통신 비용을 고려해
+            학습 시간을 줄이는 시스템 및 스케줄링 관점의 최적화를 수행한 점입니다.
+          </div>
+        </section>
+
+        <section class="section" id="motivation">
+          <h2>02. Motivation & Goal</h2>
+
+          <h3>Research Motivation</h3>
+          <p>
+            여러 GPU를 동시에 사용하더라도 GPU 성능이 서로 다르고, 레이어 간 통신 비용이 존재한다면
+            단순히 GPU 개수만 늘린다고 학습이 빨라지지는 않습니다.
+          </p>
+
+          <p>
+            특히 LLM 학습은 각 레이어의 연산량이 크고 레이어 간 의존성이 강하기 때문에,
+            잘못된 레이어 분할은 오히려 병목을 유발할 수 있습니다.
+            따라서 “이기종 GPU 환경에서 레이어를 어떤 기준으로 배치해야 학습 시간이 최소화되는가?”라는
+            문제를 해결하고자 했습니다.
+          </p>
+
+          <h3>Research Goal</h3>
+          <ul>
+            <li>HEFT 스케줄링 알고리즘의 동작 원리 이해</li>
+            <li>HEFT 알고리즘을 직접 구현하여 코드 수준에서 검증</li>
+            <li>LLM 레이어 구조를 DAG로 모델링하고 연산·통신 비용 수치화</li>
+            <li>실제 다중 GPU 학습 환경에 HEFT 기반 레이어 배치 적용</li>
+            <li>AUTO 분할 방식과 HEFT 기반 분할 방식의 학습 시간 비교</li>
+          </ul>
+        </section>
+
+        <section class="section" id="role">
+          <h2>03. My Role</h2>
+
+          <div class="card-grid">
+            <div class="role-card">
+              <h3>HEFT Algorithm Implementation</h3>
+              <p>
+                HEFT 논문을 기반으로 task prioritizing과 processor assignment 과정을 직접 구현했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>LLM Layer DAG Modeling</h3>
+              <p>
+                Llama3-8B-Instruct의 Embed, Layer0~31, Norm, LM Head 구조를 DAG 형태로 모델링했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>GPU Cost Modeling</h3>
+              <p>
+                Ada 6000과 RTX 3090의 연산 성능 차이 및 GPU 간 통신 속도를 반영하여 연산 비용과 통신 비용을 수치화했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>Experiment & Analysis</h3>
+              <p>
+                AUTO 분할 방식과 HEFT 기반 레이어 배치 방식의 실제 학습 시간을 비교하고 결과를 분석했습니다.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="heft">
+            <h2>04. HEFT Algorithm</h2>
+
+            <p>
+            HEFT는 Heterogeneous Earliest Finish Time의 약자로, 이기종 컴퓨팅 환경에서
+            작업 간 의존성과 통신 비용을 고려하여 작업을 프로세서에 배치하는 휴리스틱 스케줄링 알고리즘입니다.
+            </p>
+
+            <p>
+            HEFT 알고리즘은 2단계로 나뉜다.
+            </p>
+            <p>1. Prioritizing tasks : 각 작업에 우선순위가 부여되는 작업한다. 
+                </p>
+
+            <div class="image-box">
+                <img src="./HEFT/prioritizing.jpg" alt="이미지 설명" />
+                </div>
+
+            <p>
+                2. Assigning tasks to workers : 설정된 우선순위부터 작업을 최적의 프로세서에 할당한다.
+                </p>
+
+            <div class="image-box">
+                <img src="./HEFT/assigning.jpg" alt="이미지 설명" />
+                </div>
+
+          <div class="flow-box">
+            <div class="flow-step">
+              <strong>Step 1. Input Graph Construction</strong>
+              작업 간 의존성을 DAG 형태로 정의하고, 각 작업의 실행 시간과 작업 간 통신 비용을 입력으로 사용합니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 2. Task Prioritizing</strong>
+              각 task의 upward rank를 계산하여 실행 우선순위를 정합니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 3. Processor Assignment</strong>
+              우선순위가 높은 task부터 각 GPU에 배치했을 때의 earliest finish time을 계산합니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 4. Scheduling Result</strong>
+              가장 빠른 종료 시간을 만드는 GPU에 task를 할당하여 전체 실행 시간을 줄입니다.
+            </div>
+          </div>
+
+          <div class="highlight">
+            HEFT는 단순히 가장 빠른 GPU에 모든 작업을 넣는 방식이 아니라,
+            작업 의존성, 통신 비용, 프로세서별 실행 시간을 함께 고려해 전체 makespan을 최소화하는 방향으로 동작합니다.
+          </div>
+        </section>
+
+        <section class="section" id="environment">
+          <h2>05. GPU Environment</h2>
+
+          <p>
+            실험은 성능이 서로 다른 Ada 6000 GPU 1대와 RTX 3090 GPU 2대를 사용하는 이기종 GPU 환경을 기준으로 수행했습니다.
+          </p>
+
+          <li>각 GPU별 연산 성능</li>
+
+          <div class="table-box">
+            <table>
+              <thead>
+                <tr>
+                  <th>GPU</th>
+                  <th>Model</th>
+                  <th>Single-Precision</th>
+                  <th>Tensor Core</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>GPU 0</td>
+                  <td>Ada 6000</td>
+                  <td>911.1 TFLOPs</td>
+                  <td>1457 TFLOPs</td>
+                </tr>
+                <tr>
+                  <td>GPU 1</td>
+                  <td>RTX 3090</td>
+                  <td>35.6 TFLOPs</td>
+                  <td>285.7 TFLOPs</td>
+                </tr>
+                <tr>
+                  <td>GPU 2</td>
+                  <td>RTX 3090</td>
+                  <td>35.6 TFLOPs</td>
+                  <td>285.7 TFLOPs</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <li>GPU 간 데이터 전송 속도</li>
+
+          <div class="table-box">
+            <table>
+              <thead>
+                <tr>
+                  <th>From → To</th>
+                  <th>Transfer Speed</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>GPU 0 ↔ GPU 1</td>
+                  <td>32 GB/s</td>
+                </tr>
+                <tr>
+                  <td>GPU 0 ↔ GPU 2</td>
+                  <td>32 GB/s</td>
+                </tr>
+                <tr>
+                  <td>GPU 1 ↔ GPU 2</td>
+                  <td>32 GB/s</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="highlight">
+            Tensor Core 기준으로 Ada 6000은 RTX 3090보다 약 5배 이상 높은 연산 성능을 보이므로,
+            단순 균등 분할보다 GPU 성능 차이를 고려한 레이어 배치가 중요합니다.
+          </div>
+
+          <p>
+
+          </p>
+
+          <p>
+            Single-precision 기준으로 연산 성능이 6000이 3090보다 약 2.5배 더 빠르다. 
+            Tensor Core 기준으로는 6000이 3090보다 약 5.1배 더 빠르다. GPU 간 또는 GPU-CPU 간 데이터 전송 속도는 32 GB/s이다.
+          </p>
+        </section>
+
+        <section class="section" id="model">
+          <h2>06. Model & DAG Design</h2>
+
+          <p>
+            본 실험은 Llama3-8B-Instruct 모델에 QLoRA 및 FlashAttention을 적용한 구조를 기반으로 진행했습니다.
+            전체 모델 구조는 Embed, Layer0~Layer31, Norm, LM Head로 이어지는 순차적 흐름으로 구성되며,
+            이를 DAG 형태로 모델링했습니다.
+          </p>
+
+          <div class="card-grid">
+            <div class="info-card">
+              <h3>Model</h3>
+              <p>
+                Llama3-8B-Instruct 기반 구조를 대상으로 레이어 배치 실험을 수행했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Task Graph</h3>
+              <p>
+                Embed → Layer0~31 → Norm → LM Head 흐름을 DAG로 구성했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Execution Cost</h3>
+              <p>
+                GPU별 연산 성능 차이를 반영하여 각 레이어의 실행 비용을 계산했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Communication Cost</h3>
+              <p>
+                레이어 간 activation 전달 비용을 GPU 간 통신 비용으로 반영했습니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="table-box">
+            <table>
+              <thead>
+                <tr>
+                  <th>Operation</th>
+                  <th>GPU 0: Ada 6000</th>
+                  <th>GPU 1: RTX 3090</th>
+                  <th>GPU 2: RTX 3090</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Embed</td>
+                  <td>1</td>
+                  <td>0.4</td>
+                  <td>0.4</td>
+                </tr>
+                <tr>
+                  <td>Layer 0</td>
+                  <td>106500</td>
+                  <td>21300</td>
+                  <td>21300</td>
+                </tr>
+                <tr>
+                  <td>Layer 31</td>
+                  <td>106500</td>
+                  <td>21300</td>
+                  <td>21300</td>
+                </tr>
+                <tr>
+                  <td>Norm</td>
+                  <td>2</td>
+                  <td>0.8</td>
+                  <td>0.8</td>
+                </tr>
+                <tr>
+                  <td>LM Head</td>
+                  <td>256300</td>
+                  <td>102520</td>
+                  <td>102520</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="image-box">
+                <img src="./HEFT/layer.jpg" alt="이미지 설명" />
+                </div>
+
+          </div>
+        </section>
+
+        <section class="section" id="experiment">
+          <h2>07. Experiment Results</h2>
+
+          <p>
+            AUTO 레이어 분할 방식과 HEFT 알고리즘을 통해 도출한 레이어 배치 방식을 비교하여
+            실제 LLM 학습 시간을 측정했습니다.
+          </p>
+
+          <div class="card-grid">
+            <div class="result-card">
+              <h3>AUTO 분할 학습 시간</h3>
+              <div class="result-number">5h 29m</div>
+              <p>
+                GPU 3개에 자동으로 레이어를 분할한 경우 5시간 29분 30초가 소요되었습니다.
+              </p>
+            </div>
+
+            <div class="result-card">
+              <h3>HEFT 적용 학습 시간</h3>
+              <div class="result-number">2h 49m</div>
+              <p>
+                HEFT 기반 레이어 배치를 적용한 결과 2시간 49분 22초가 소요되었습니다.
+              </p>
+            </div>
+
+            <div class="result-card">
+              <h3>학습 시간 단축</h3>
+              <div class="result-number">약 3h</div>
+              <p>
+                기존 AUTO 분할 대비 약 3시간의 학습 시간 단축을 확인했습니다.
+              </p>
+            </div>
+
+            <div class="result-card">
+              <h3>실험 설정</h3>
+              <div class="result-number">r=32</div>
+              <p>
+                Rank/Alpha 32, Epoch 6, Batch size 5, Quantization 적용 조건에서 비교했습니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="table-box">
+            <table>
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Layer Placement</th>
+                  <th>Training Time</th>
+                  <th>Result</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>AUTO</td>
+                  <td>GPU 0 / GPU 1 / GPU 2 자동 분할</td>
+                  <td>5시간 29분 30초</td>
+                  <td>기준 성능</td>
+                </tr>
+                <tr>
+                  <td>HEFT</td>
+                  <td>성능이 가장 높은 GPU 중심 배치</td>
+                  <td>2시간 49분 22초</td>
+                  <td>약 3시간 단축</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="highlight">
+            실험 결과, 이기종 GPU 환경에서는 단순 AUTO 분할보다 GPU 성능과 통신 비용을 고려한 스케줄링이
+            실제 학습 시간에 큰 영향을 줄 수 있음을 확인했습니다.
+          </div>
+        </section>
+
+        <section class="section" id="verification">
+          <h2>08. Code Verification</h2>
+
+          <p>
+            구현한 HEFT 알고리즘의 정확성을 검증하기 위해,
+            HEFT 논문에 제시된 예제 DAG를 동일하게 적용하여 논문 결과와 코드 출력 결과를 비교했습니다.
+          </p>
+
+          <div class="flow-box">
+            <div class="flow-step">
+              <strong>Reference Example</strong>
+              논문에 제시된 task graph와 processor 환경을 기준으로 스케줄링을 수행했습니다.
+            </div>
+
+            <div class="image-box">
+                <img src="./HEFT/1.jpg" alt="이미지 설명" />
+                </div>
+
+            <div class="flow-step">
+              <strong>Expected Assignment</strong>
+              논문 결과에서는 P1, P2, P3에 task가 특정 방식으로 배치되는 것을 확인했습니다.
+            </div>
+
+            <div class="image-box">
+                <img src="./HEFT/2.jpg" alt="이미지 설명" />
+                </div>
+
+            <div class="flow-step">
+              <strong>Code Output</strong>
+              직접 구현한 HEFT 코드에 동일한 입력을 적용했을 때 논문과 동일한 결과가 출력됨을 확인했습니다.
+            </div>
+
+            <div class="image-box">
+                <img src="./HEFT/3.jpg" alt="이미지 설명" />
+                </div>
+
+          </div>
+
+          <div class="highlight">
+            이를 통해 구현한 HEFT 알고리즘이 task prioritizing과 processor assignment 과정을
+            논문과 일치하게 수행하고 있음을 검증했습니다.
+          </div>
+        </section>
+
+        <section class="section" id="source">
+          <h2>9. Source Code</h2>
+
+          <p>
+            프로젝트 코드 또는 실험 자료는 아래 GitHub 저장소에서 확인할 수 있습니다.
+          </p>
+
+          <a class="source-button" href="https://github.com/YuNa-Kim-344/HEFT-Algorithm" target="_blank">
+            GitHub Repository 보기 →
+          </a>
+        </section>
+
+        <div class="bottom-nav">
+          <a href="index.html#heft-card" class="nav-button">← 포트폴리오로 돌아가기</a>
+          <a href="#" class="nav-button">맨 위로 ↑</a>
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      © 2026 김유나. All rights reserved.
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Round Robin 기반 L4 Load Balancer 구현과 성능 비교</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Pretendard", "Noto Sans KR", Arial, sans-serif;
+      background: #faf9f6;
+      color: #2d2d2d;
+      line-height: 1.8;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1060px, 92%);
+      margin: 0 auto;
+      padding: 46px 0 90px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 34px;
+      color: #777;
+      font-size: 15px;
+      transition: 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #222;
+      transform: translateX(-3px);
+    }
+
+    .hero {
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 22px;
+      padding: 42px 46px;
+      margin-bottom: 34px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.035);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 6px 13px;
+      background: #eee7dc;
+      color: #6b5d4c;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .project-title {
+      font-size: 42px;
+      font-weight: 900;
+      color: #3f3f3f;
+      letter-spacing: -1.2px;
+      line-height: 1.25;
+      margin-bottom: 16px;
+    }
+
+    .project-summary {
+      font-size: 18px;
+      color: #5f5f5f;
+      max-width: 880px;
+      margin-bottom: 22px;
+    }
+
+    .project-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .meta-item {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .meta-item strong {
+      color: #333;
+      margin-right: 6px;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      padding: 6px 12px;
+      border-radius: 9px;
+      background: #f1ece4;
+      color: #555;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .content-layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 34px;
+      align-items: start;
+    }
+
+    .toc {
+      position: sticky;
+      top: 28px;
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.03);
+    }
+
+    .toc-title {
+      font-size: 16px;
+      font-weight: 900;
+      font-style: italic;
+      margin-bottom: 14px;
+    }
+
+    .toc a {
+      display: block;
+      color: #777;
+      font-size: 14px;
+      margin-bottom: 10px;
+      transition: 0.2s ease;
+    }
+
+    .toc a:hover {
+      color: #222;
+      padding-left: 4px;
+    }
+
+    .section {
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 18px;
+      padding: 34px 38px;
+      margin-bottom: 26px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.035);
+    }
+
+    .section h2 {
+      font-size: 25px;
+      font-weight: 900;
+      font-style: italic;
+      color: #3f3f3f;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee6dc;
+    }
+
+    .section h3 {
+      font-size: 20px;
+      margin: 22px 0 10px;
+      color: #3f3f3f;
+    }
+
+    .section p {
+      color: #444;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+
+    .section ul {
+      padding-left: 22px;
+    }
+
+    .section li {
+      margin-bottom: 10px;
+      color: #444;
+      font-size: 16px;
+    }
+
+    .highlight {
+      background: #fbfaf7;
+      border-left: 4px solid #8b7b66;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-top: 24px;
+      color: #4d4d4d;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .info-card,
+    .role-card,
+    .result-card {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 14px;
+      padding: 22px;
+    }
+
+    .info-card h3,
+    .role-card h3,
+    .result-card h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #3f3f3f;
+    }
+
+    .info-card p,
+    .role-card p,
+    .result-card p {
+      font-size: 15px;
+      color: #555;
+      margin: 0;
+    }
+
+    .result-number {
+      font-size: 30px;
+      font-weight: 900;
+      color: #8b7b66;
+      margin-bottom: 8px;
+    }
+
+    .flow-box {
+      background: #ffffff;
+      border: 1px solid #eee6dc;
+      border-radius: 16px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+
+    .flow-step {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      color: #444;
+      font-size: 15px;
+    }
+
+    .flow-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .flow-step strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .table-box {
+      width: 100%;
+      overflow-x: auto;
+      margin: 24px 0;
+      border-radius: 14px;
+      border: 1px solid #eee6dc;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      min-width: 640px;
+    }
+
+    th,
+    td {
+      padding: 13px 14px;
+      border-bottom: 1px solid #eee6dc;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background: #fbfaf7;
+      font-weight: 800;
+      color: #444;
+    }
+
+    td {
+      color: #555;
+    }
+
+    .image-box {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #eee6dc;
+      border-radius: 16px;
+      padding: 18px;
+      margin: 24px 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .image-box img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: 560px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: 12px;
+      border: 1px solid #eee6dc;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .image-caption {
+      font-size: 14px;
+      color: #777;
+      text-align: center;
+      margin-top: -4px;
+    }
+
+    .source-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 18px;
+      background: #333;
+      color: #fff;
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .source-button:hover {
+      background: #8b7b66;
+      transform: translateY(-2px);
+    }
+
+    .bottom-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 40px;
+    }
+
+    .nav-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #333;
+      color: #fff;
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .nav-button:hover {
+      background: #8b7b66;
+      transform: translateY(-2px);
+    }
+
+    footer {
+      text-align: center;
+      color: #aaa;
+      font-size: 13px;
+      margin-top: 70px;
+    }
+
+    @media (max-width: 900px) {
+      .content-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .toc {
+        position: static;
+      }
+
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: 92%;
+        padding-top: 30px;
+      }
+
+      .hero {
+        padding: 32px 24px;
+      }
+
+      .project-title {
+        font-size: 30px;
+      }
+
+      .project-summary {
+        font-size: 16px;
+      }
+
+      .section {
+        padding: 28px 22px;
+      }
+
+      .bottom-nav {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <a href="index.html#load-balancer-card" class="back-link">← 포트폴리오로 돌아가기</a>
+
+    <header class="hero">
+      <span class="eyebrow">Project Detail</span>
+
+      <h1 class="project-title">Round Robin 기반 L4 Load Balancer 구현과 성능 비교</h1>
+
+      <p class="project-summary">
+        Round Robin 알고리즘을 적용한 L4 Load Balancer를 직접 구현하고,
+        로드밸런싱 적용 여부에 따른 요청 성공률, 응답 시간, 서버별 부하 분산 정도를 비교하여
+        네트워크 환경에서 부하 분산의 필요성을 검증한 프로젝트입니다.
+      </p>
+
+      <div class="project-meta">
+        <div class="meta-item"><strong>기간</strong>2024.11.13 ~ 2024.12.02</div>
+        <div class="meta-item"><strong>형태</strong>Team Project / 3인</div>
+        <div class="meta-item"><strong>역할</strong>Simulation Integration / Experiment Design / Result Analysis</div>
+      </div>
+
+      <div class="tag-list">
+        <span class="tag">Python</span>
+        <span class="tag">Socket Programming</span>
+        <span class="tag">L4 Load Balancing</span>
+        <span class="tag">Round Robin</span>
+        <span class="tag">Network Simulation</span>
+        <span class="tag">TCP/IP</span>
+        <span class="tag">RIP Routing</span>
+      </div>
+    </header>
+
+    <div class="content-layout">
+      <aside class="toc">
+        <p class="toc-title">CONTENTS</p>
+        <a href="#overview">01. Project Overview</a>
+        <a href="#motivation">02. Motivation & Goal</a>
+        <a href="#role">03. My Role</a>
+        <a href="#concept">04. Core Concept</a>
+        <a href="#architecture">05. Network Architecture</a>
+        <a href="#implementation">06. Implementation</a>
+        <a href="#experiment">07. Experiment Setup</a>
+        <a href="#results">08. Experiment Results</a>
+        <a href="#insight">09. Insight</a>
+        <a href="#source">10. Source Code</a>
+      </aside>
+
+      <main>
+        <section class="section" id="overview">
+          <h2>01. Project Overview</h2>
+
+          <p>
+            본 프로젝트는 Round Robin 알고리즘을 활용한 L4 Load Balancer를 직접 구현하고,
+            서버 간 트래픽 분산 효과와 시스템 성능 변화를 실험적으로 비교한 네트워크 프로젝트입니다.
+          </p>
+
+          <p>
+            TCP/UDP가 속한 Transport Layer에서 동작하는 L4 Load Balancer를 구성하여,
+            클라이언트 요청을 여러 서버에 순차적으로 분배했습니다. 이후 로드밸런싱을 적용한 경우와
+            적용하지 않은 경우를 동일한 요청 시퀀스로 비교하여 요청 성공률, 응답 시간, 서버별 부하 분산 정도를 분석했습니다.
+          </p>
+
+          <div class="highlight">
+            핵심은 단순히 Round Robin 알고리즘을 구현하는 것이 아니라,
+            로드밸런싱 적용 여부에 따라 네트워크 성능과 서버 부하가 어떻게 달라지는지를 실험적으로 검증한 점입니다.
+          </div>
+        </section>
+
+        <section class="section" id="motivation">
+          <h2>02. Motivation & Goal</h2>
+
+          <h3>Research Motivation</h3>
+          <p>
+            네트워크 환경에서 서버 수가 증가하더라도 부하 분산 기법이 적용되지 않으면
+            특정 서버에 요청이 집중되어 응답 지연, 요청 실패, 시스템 불안정성이 발생할 수 있습니다.
+          </p>
+
+          <p>
+            이러한 문제를 해결하기 위해 실제 네트워크 계층에서 널리 사용되는
+            L4 Load Balancer와 Round Robin 알고리즘의 효과를 직접 구현하고,
+            실험을 통해 성능 차이를 확인하고자 했습니다.
+          </p>
+
+          <h3>Research Goal</h3>
+          <ul>
+            <li>L4 계층에서 동작하는 Load Balancer를 Round Robin 알고리즘 기반으로 직접 구현</li>
+            <li>최소 3개 이상의 서버 환경에서 클라이언트 요청을 균등하게 분산</li>
+            <li>로드밸런싱 적용 여부에 따른 요청 성공/실패 수 비교</li>
+            <li>응답 시간과 서버별 요청 분포를 기반으로 성능 차이 분석</li>
+            <li>Round Robin 기반 로드밸런싱의 안정성 및 성능 향상 효과 검증</li>
+          </ul>
+        </section>
+
+        <section class="section" id="role">
+          <h2>03. My Role</h2>
+
+          <div class="card-grid">
+            <div class="role-card">
+              <h3>Simulation Integration</h3>
+              <p>
+                팀원이 구현한 서버, 라우터, 로드밸런서 코드를 하나의 네트워크 시뮬레이션 구조로 통합했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>Experiment Design</h3>
+              <p>
+                로드밸런싱 적용/미적용 환경을 공정하게 비교할 수 있도록 동일한 요청 시퀀스 기반 실험 구조를 설계했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>Performance Metrics</h3>
+              <p>
+                총 요청 수, 실패 요청 수, 도달 불가 요청 수, 총 응답 시간, 서버별 요청 수 등 성능 지표를 정의했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>Result Analysis</h3>
+              <p>
+                실험 로그와 엑셀 결과를 기반으로 Round Robin 방식의 부하 분산 효과와 성능 차이를 분석했습니다.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="concept">
+          <h2>04. Core Concept</h2>
+
+          <div class="flow-box">
+            <div class="flow-step">
+              <strong>Load Balancing</strong>
+              네트워크 또는 서버에 가해지는 부하를 여러 서버에 분산시켜 가용성과 응답 시간을 최적화하는 기술입니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>L4 Load Balancer</strong>
+              TCP/UDP가 속한 Transport Layer에서 동작하며, IP와 포트 정보를 기반으로 트래픽을 처리합니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Round Robin Algorithm</strong>
+              클라이언트 요청을 여러 서버에 순차적으로 분배하는 정적 부하 분산 방식입니다.
+            </div>
+          </div>
+
+          <div class="highlight">
+            Round Robin은 모든 서버가 유사한 처리 성능을 가진다고 가정할 때 간단하면서도 효과적으로
+            서버 부하를 분산할 수 있는 알고리즘입니다.
+          </div>
+        </section>
+
+        <section class="section" id="architecture">
+          <h2>05. Network Architecture</h2>
+
+          <p>
+            본 프로젝트에서는 클라이언트 요청이 스위치, 라우터, 로드밸런서를 거쳐 여러 서버로 전달되는
+            네트워크 흐름을 시뮬레이션했습니다.
+          </p>
+
+          <div class="image-box">
+            <img src="./RR/네트워크 구조.jpg" alt="L4 Load Balancer 네트워크 구조" />
+            <p class="image-caption">네트워크 구조 이미지</p>
+          </div>
+
+          <div class="image-box">
+            <img src="./RR/라우터 및 서버 설정.jpg" alt="라우터 및 서버 설정 이미지" />
+            <p class="image-caption">라우터 및 서버 설정</p>
+          </div>
+        </section>
+
+        <section class="section" id="implementation">
+          <h2>06. Implementation</h2>
+
+          <p>
+            구현 단계에서는 서버, 라우터, 로드밸런서 모듈을 통합하고,
+            Round Robin 방식으로 요청이 서버에 분배되도록 구성했습니다.
+          </p>
+
+          <div class="card-grid">
+            <div class="info-card">
+              <h3>Server</h3>
+              <p>
+                각 서버는 클라이언트 요청을 처리하고 처리 결과 및 응답 시간을 기록합니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Router</h3>
+              <p>
+                라우터는 요청 경로를 결정하고 라우팅 테이블을 기반으로 패킷 전달을 수행합니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Load Balancer</h3>
+              <p>
+                Round Robin 알고리즘을 통해 클라이언트 요청을 서버에 순차적으로 분배합니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Logging</h3>
+              <p>
+                요청 흐름, 실패 여부, 서버별 요청 수, 응답 시간을 기록하여 결과 분석에 활용했습니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="image-box">
+            <img src="./RR/구현1.jpg"alt="Load Balancer 구현 이미지 1" />
+            <p class="image-caption">구현 화면 1</p>
+
+            <img src="./RR/구현2.jpg" alt="Load Balancer 구현 이미지 2" />
+            <p class="image-caption">구현 화면 2</p>
+          </div>
+        </section>
+
+        <section class="section" id="experiment">
+          <h2>07. Experiment Setup</h2>
+
+          <p>
+            로드밸런싱 적용 여부에 따른 성능 차이를 공정하게 비교하기 위해
+            동일한 요청 시퀀스를 두 실험 환경에 적용했습니다.
+          </p>
+
+          <div class="flow-box">
+            <div class="flow-step">
+              <strong>1. 요청 전송 조건</strong>
+              실험마다 요청 시퀀스를 랜덤 생성하되, 로드밸런싱 적용/미적용 케이스에는 동일한 요청 시퀀스를 전송했습니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>2. 라우팅 테이블 초기화</strong>
+              알고리즘 변경 시 이전 실험의 라우팅 정보가 영향을 주지 않도록 라우팅 테이블을 초기화했습니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>3. 요청 흐름 시각화</strong>
+              요청이 스위치 → 라우터 → 로드밸런서 → 서버로 전달되는 경로를 기록하고 시각화했습니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>4. 결과 저장</strong>
+              총 요청 수, 실패 요청 수, 도달 불가 요청 수, 총 응답 시간, 서버별 요청 수를 엑셀 파일로 저장했습니다.
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="results">
+          <h2>08. Experiment Results</h2>
+
+          <p>
+            Round Robin 기반 로드밸런싱을 적용한 경우와 로드밸런싱을 적용하지 않은 경우를 비교했습니다.
+          </p>
+
+          <div class="card-grid">
+            <div class="result-card">
+              <h3>Round Robin - 성공 요청</h3>
+              <div class="result-number">226</div>
+              <p>
+                총 230건 중 도달 불가 4건을 제외한 226건이 성공적으로 처리되었습니다.
+              </p>
+            </div>
+
+            <div class="result-card">
+              <h3>Round Robin - 실패 요청</h3>
+              <div class="result-number">0</div>
+              <p>
+                서버 과부하로 인한 실패 요청은 발생하지 않았습니다.
+              </p>
+            </div>
+
+            <div class="result-card">
+              <h3>미적용 - 실패 요청</h3>
+              <div class="result-number">20</div>
+              <p>
+                로드밸런싱을 적용하지 않은 경우 모든 요청이 서버 1번에 집중되어 20건이 실패했습니다.
+              </p>
+            </div>
+
+            <div class="result-card">
+              <h3>응답 시간 비교</h3>
+              <div class="result-number">0.14s</div>
+              <p>
+                Round Robin 적용 시 총 응답 시간은 0.14초로, 미적용 방식의 0.17초보다 짧았습니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="table-box">
+            <table>
+              <thead>
+                <tr>
+                  <th>구분</th>
+                  <th>총 요청 수</th>
+                  <th>성공 요청</th>
+                  <th>실패 요청</th>
+                  <th>특징</th>
+                  <th>총 응답 시간</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Round Robin 적용</td>
+                  <td>230</td>
+                  <td>226</td>
+                  <td>0</td>
+                  <td>4개 서버에 균등 분배</td>
+                  <td>0.14초</td>
+                </tr>
+                <tr>
+                  <td>로드밸런싱 미적용</td>
+                  <td>230</td>
+                  <td>210</td>
+                  <td>20</td>
+                  <td>서버 1번에 요청 집중</td>
+                  <td>0.17초</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="image-box">
+            <img src="./RR/결과.jpg" alt="Round Robin 성능 비교 결과 이미지" />
+            <p class="image-caption">Round Robin 적용/미적용 성능 비교 결과</p>
+          </div>
+
+          <div class="highlight">
+            실험 결과, Round Robin을 적용한 경우 요청이 여러 서버에 균등하게 분산되어 과부하가 발생하지 않았고,
+            로드밸런싱 미적용 방식보다 더 안정적이고 빠른 요청 처리가 가능했습니다.
+          </div>
+        </section>
+
+        <section class="section" id="insight">
+          <h2>09. Insight</h2>
+
+          <p>
+            본 실험을 통해 로드밸런싱은 단순히 요청을 나누는 기능을 넘어,
+            서버 과부하를 방지하고 전체 시스템의 안정성과 응답 성능을 향상시키는 핵심 네트워크 기술임을 확인했습니다.
+          </p>
+
+          <ul>
+            <li>Round Robin 적용 시 요청이 균등하게 분배되어 특정 서버의 과부하를 방지할 수 있었습니다.</li>
+            <li>로드밸런싱 미적용 시 특정 서버에 요청이 집중되어 실패 요청과 응답 지연이 발생했습니다.</li>
+            <li>동일한 요청 시퀀스를 사용함으로써 두 방식의 성능 차이를 공정하게 비교할 수 있었습니다.</li>
+            <li>네트워크 시스템에서는 알고리즘 자체뿐 아니라 실험 조건과 성능 지표 설계가 중요하다는 점을 배웠습니다.</li>
+          </ul>
+        </section>
+
+        <section class="section" id="source">
+          <h2>10. Source Code</h2>
+
+          <p>
+            프로젝트 코드 또는 실험 자료는 아래 GitHub 저장소에서 확인할 수 있습니다.
+          </p>
+
+          <a class="source-button" href="https://github.com/YuNa-Kim-344/L4-Load-Balancer_using_Round-Robin" target="_blank">
+            GitHub Repository 보기 →
+          </a>
+        </section>
+
+        <div class="bottom-nav">
+          <a href="index.html#load-balancer-card" class="nav-button">← 포트폴리오로 돌아가기</a>
+          <a href="#" class="nav-button">맨 위로 ↑</a>
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      © 2026 김유나. All rights reserved.
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PatchCore 기반 이미지 이상탐지 논문 재현</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Pretendard", "Noto Sans KR", Arial, sans-serif;
+      background: #faf9f6;
+      color: #2d2d2d;
+      line-height: 1.8;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1060px, 92%);
+      margin: 0 auto;
+      padding: 46px 0 90px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 34px;
+      color: #777;
+      font-size: 15px;
+      transition: 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #222;
+      transform: translateX(-3px);
+    }
+
+    .hero {
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 22px;
+      padding: 42px 46px;
+      margin-bottom: 34px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.035);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 6px 13px;
+      background: #eee7dc;
+      color: #6b5d4c;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .project-title {
+      font-size: 42px;
+      font-weight: 900;
+      color: #3f3f3f;
+      letter-spacing: -1.2px;
+      line-height: 1.25;
+      margin-bottom: 16px;
+    }
+
+    .project-summary {
+      font-size: 18px;
+      color: #5f5f5f;
+      max-width: 880px;
+      margin-bottom: 22px;
+    }
+
+    .project-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .meta-item {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .meta-item strong {
+      color: #333;
+      margin-right: 6px;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      padding: 6px 12px;
+      border-radius: 9px;
+      background: #f1ece4;
+      color: #555;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .content-layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 34px;
+      align-items: start;
+    }
+
+    .toc {
+      position: sticky;
+      top: 28px;
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.03);
+    }
+
+    .toc-title {
+      font-size: 16px;
+      font-weight: 900;
+      font-style: italic;
+      margin-bottom: 14px;
+    }
+
+    .toc a {
+      display: block;
+      color: #777;
+      font-size: 14px;
+      margin-bottom: 10px;
+      transition: 0.2s ease;
+    }
+
+    .toc a:hover {
+      color: #222;
+      padding-left: 4px;
+    }
+
+    .section {
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 18px;
+      padding: 34px 38px;
+      margin-bottom: 26px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.035);
+    }
+
+    .section h2 {
+      font-size: 25px;
+      font-weight: 900;
+      font-style: italic;
+      color: #3f3f3f;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee6dc;
+    }
+
+    .section h3 {
+      font-size: 20px;
+      margin: 22px 0 10px;
+      color: #3f3f3f;
+    }
+
+    .section p {
+      color: #444;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+
+    .section ul {
+      padding-left: 22px;
+    }
+
+    .section li {
+      margin-bottom: 10px;
+      color: #444;
+      font-size: 16px;
+    }
+
+    .highlight {
+      background: #fbfaf7;
+      border-left: 4px solid #8b7b66;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-top: 24px;
+      color: #4d4d4d;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .info-card,
+    .role-card,
+    .method-card {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 14px;
+      padding: 22px;
+    }
+
+    .info-card h3,
+    .role-card h3,
+    .method-card h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #3f3f3f;
+    }
+
+    .info-card p,
+    .role-card p,
+    .method-card p {
+      font-size: 15px;
+      color: #555;
+      margin: 0;
+    }
+
+    .flow-box {
+      background: #ffffff;
+      border: 1px solid #eee6dc;
+      border-radius: 16px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+
+    .flow-step {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      color: #444;
+      font-size: 15px;
+    }
+
+    .flow-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .flow-step strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .presentation-image {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #eee6dc;
+      border-radius: 16px;
+      padding: 18px;
+      margin: 24px 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .presentation-image img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: 560px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: 12px;
+      border: 1px solid #eee6dc;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .demo-video-box {
+        width: 100%;
+        background: #fbfaf7;
+        border: 1px solid #eee6dc;
+        border-radius: 16px;
+        padding: 18px;
+        margin: 24px 0;
+        overflow: hidden;
+        }
+
+        .demo-video-box video {
+        width: 100%;
+        max-height: 560px;
+        display: block;
+        border-radius: 12px;
+        background: #000;
+        }
+
+    .source-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 18px;
+      background: #333;
+      color: #fff;
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .source-button:hover {
+      background: #8b7b66;
+      transform: translateY(-2px);
+    }
+
+    .bottom-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 40px;
+    }
+
+    .nav-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #333;
+      color: #fff;
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .nav-button:hover {
+      background: #8b7b66;
+      transform: translateY(-2px);
+    }
+
+    footer {
+      text-align: center;
+      color: #aaa;
+      font-size: 13px;
+      margin-top: 70px;
+    }
+
+    @media (max-width: 900px) {
+      .content-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .toc {
+        position: static;
+      }
+
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: 92%;
+        padding-top: 30px;
+      }
+
+      .hero {
+        padding: 32px 24px;
+      }
+
+      .project-title {
+        font-size: 30px;
+      }
+
+      .project-summary {
+        font-size: 16px;
+      }
+
+      .section {
+        padding: 28px 22px;
+      }
+
+      .bottom-nav {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <a href="index.html#patchcore-card" class="back-link">← 포트폴리오로 돌아가기</a>
+
+    <header class="hero">
+      <span class="eyebrow">Project Detail</span>
+
+      <h1 class="project-title">PatchCore 기반 이미지 이상탐지 논문 재현</h1>
+
+      <p class="project-summary">
+        비지도 이미지 이상탐지 논문 <em>Towards Total Recall in Industrial Anomaly Detection</em>의 PatchCore 기법을 분석하고,
+        공식 구현 코드를 기반으로 전체 파이프라인을 실행하여 anomaly score와 anomaly map을 확인한 논문 재현 프로젝트입니다.
+      </p>
+
+      <div class="project-meta">
+        <div class="meta-item"><strong>기간</strong>2024.05.10 ~ 2024.07.02</div>
+        <div class="meta-item"><strong>형태</strong>개인 프로젝트</div>
+        <div class="meta-item"><strong>역할</strong>End-to-End Ownership</div>
+      </div>
+
+      <div class="tag-list">
+        <span class="tag">Python</span>
+        <span class="tag">Computer Vision</span>
+        <span class="tag">Anomaly Detection</span>
+        <span class="tag">PatchCore</span>
+        <span class="tag">Unsupervised Learning</span>
+        <span class="tag">Paper Reproduction</span>
+        <span class="tag">Anomaly Map</span>
+      </div>
+    </header>
+
+    <div class="content-layout">
+      <aside class="toc">
+        <p class="toc-title">CONTENTS</p>
+        <a href="#overview">01. Project Overview</a>
+        <a href="#motivation">02. Motivation & Goal</a>
+        <a href="#role">03. My Role</a>
+        <a href="#method">04. PatchCore Method</a>
+        <a href="#experiment">05. Experiment Process</a>
+        <a href="#presentation">06. Presentation PPT</a>
+        <a href="#demo">07. Code Demo Video</a>
+        <!-- <a href="#source">08. Source Code</a> -->
+      </aside>
+
+      <main>
+        <section class="section" id="overview">
+          <h2>01. Project Overview</h2>
+
+          <p>
+            본 프로젝트는 비지도 이미지 이상탐지 분야에서 널리 활용되는 PatchCore 기법을 학습하고,
+            논문과 공식 구현 코드를 기반으로 전체 이상탐지 파이프라인을 직접 재현한 프로젝트입니다.
+          </p>
+
+          <p>
+            단순히 논문 내용을 요약하는 데 그치지 않고, 정상 이미지 feature를 memory bank로 구성하고,
+            테스트 이미지의 patch-level feature와 비교하여 anomaly score 및 anomaly map이 생성되는 과정을
+            코드 실행과 결과 분석을 통해 확인했습니다.
+          </p>
+
+          <div class="highlight">
+            핵심은 새로운 모델을 제안하는 것이 아니라, PatchCore가 왜 비지도 이상탐지에서 효과적으로 동작하는지
+            논문 → 코드 → 실험 → 결과 해석의 흐름으로 이해하고 검증한 점입니다.
+          </div>
+        </section>
+
+        <section class="section" id="motivation">
+          <h2>02. Motivation & Goal</h2>
+
+          <h3>Research Motivation</h3>
+          <p>
+            산업 및 비전 도메인에서 이상탐지는 라벨링 비용이 높고 이상 데이터가 부족한 경우가 많아,
+            정상 데이터만으로 이상을 탐지하는 비지도 접근 방식이 중요합니다.
+          </p>
+
+          <p>
+            PatchCore는 사전 학습된 백본 모델의 patch-level feature를 활용하여
+            정상 데이터의 feature distribution을 저장하고, 테스트 이미지가 정상 분포에서 얼마나 벗어나는지를
+            계산하는 방식으로 이상을 탐지합니다.
+          </p>
+
+          <h3>Research Goal</h3>
+          <ul>
+            <li>PatchCore 알고리즘의 핵심 아이디어와 동작 구조 이해</li>
+            <li>공식 구현 코드를 기반으로 전체 파이프라인 재현</li>
+            <li>로컬 데이터셋 적용을 통한 anomaly score 및 anomaly map 확인</li>
+            <li>비지도 이미지 이상탐지 기법의 실용적 장단점 분석</li>
+          </ul>
+        </section>
+
+        <section class="section" id="role">
+          <h2>03. My Role</h2>
+
+          <div class="card-grid">
+            <div class="role-card">
+              <h3>Paper Study</h3>
+              <p>
+                PatchCore 논문의 핵심 구조를 분석하고, patch-level feature, memory bank,
+                nearest neighbor 기반 anomaly scoring 방식을 정리했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>Code Reproduction</h3>
+              <p>
+                공식 구현 코드를 기반으로 실행 환경을 구성하고, 데이터 입력부터 anomaly map 생성까지
+                전체 파이프라인을 직접 실행했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>Experiment Analysis</h3>
+              <p>
+                모델이 생성한 anomaly score와 anomaly map을 확인하고,
+                정상 영역과 이상 영역이 feature distance 기반으로 어떻게 구분되는지 분석했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>Presentation & Documentation</h3>
+              <p>
+                논문 구조, 알고리즘 흐름, 실험 결과를 발표 자료로 정리하고,
+                실습 코드 실행 과정을 영상으로 기록했습니다.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="method">
+          <h2>04. PatchCore Method</h2>
+
+          <p>
+            PatchCore는 정상 이미지에서 추출한 patch-level feature를 저장하고,
+            테스트 이미지의 feature가 정상 feature 공간에서 얼마나 떨어져 있는지를 기반으로 이상 여부를 판단합니다.
+          </p>
+
+          <div class="flow-box">
+            <div class="flow-step">
+              <strong>Step 1. Feature Extraction</strong>
+              사전 학습된 CNN backbone을 활용하여 이미지의 patch-level feature를 추출합니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 2. Memory Bank Construction</strong>
+              정상 이미지에서 추출된 feature를 memory bank에 저장하여 정상 feature distribution을 구성합니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 3. Coreset Sampling</strong>
+              모든 feature를 저장하면 메모리와 계산 비용이 커지므로, 대표 feature만 선택하여 memory bank를 압축합니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 4. Nearest Neighbor Search</strong>
+              테스트 이미지의 patch feature와 memory bank 내 정상 feature 간 거리를 계산합니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 5. Anomaly Score & Map</strong>
+              정상 feature와의 거리가 큰 patch를 이상 영역으로 판단하고, 이미지 단위 anomaly score와 anomaly map을 생성합니다.
+            </div>
+          </div>
+
+          <div class="highlight">
+            PatchCore의 핵심은 “정상 이미지만으로 정상 feature 공간을 구성하고,
+            이 공간에서 벗어나는 patch를 이상으로 판단한다”는 점입니다.
+          </div>
+        </section>
+
+        <section class="section" id="experiment">
+          <h2>05. Experiment Process</h2>
+
+          <p>
+            본 프로젝트에서는 공식 구현 코드를 실행하고, 로컬 데이터셋에 적용하여 PatchCore의 동작을 검증했습니다.
+            실험은 모델 성능 개선보다 알고리즘 이해와 재현에 초점을 맞추었습니다.
+          </p>
+
+          <div class="card-grid">
+            <div class="info-card">
+              <h3>Dataset</h3>
+              <p>
+                정상 이미지와 이상 이미지로 구성된 이미지 데이터셋을 활용하여 실험을 진행했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Training Data</h3>
+              <p>
+                비지도 이상탐지 구조에 따라 정상 이미지 feature만 사용하여 memory bank를 구성했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Output</h3>
+              <p>
+                테스트 이미지별 anomaly score와 pixel/patch-level anomaly map을 확인했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Focus</h3>
+              <p>
+                모델 개선보다는 PatchCore의 이상탐지 흐름과 결과 해석에 초점을 두었습니다.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="presentation">
+          <h2>06. Presentation PPT</h2>
+
+          <p>
+            PatchCore 논문 분석과 재현 실험 내용을 발표 자료로 정리했습니다.
+            발표 자료에는 알고리즘 구조, 실행 과정, anomaly map 결과 해석을 포함했습니다.
+          </p>
+
+          <div class="presentation-image">
+            <img src="./patchcore/1.jpg" alt="PatchCore 발표 자료 1" />
+            <img src="./patchcore/2.jpg" alt="PatchCore 발표 자료 2" />
+            <img src="./patchcore/3.jpg" alt="PatchCore 발표 자료 3" />
+            <img src="./patchcore/4.jpg" alt="PatchCore 발표 자료 4" />
+            <img src="./patchcore/5.jpg" alt="PatchCore 발표 자료 5" />
+          </div>
+        </section>
+
+        <section class="section" id="demo">
+          <h2>07. Code Demo Video</h2>
+
+          <p>
+            PatchCore 코드 실행 과정과 결과 확인 과정을 영상으로 정리했습니다.
+          </p>
+
+          <div class="demo-video-box">
+            <video controls>
+              <source src="./patchcore/PatchCore_Code.mov" type="video/mp4" />
+              사용 중인 브라우저에서는 영상을 재생할 수 없습니다.
+            </video>
+          </div>
+        </section>
+
+        <!-- <section class="section" id="source">
+          <h2>08. Source Code</h2>
+
+          <p>
+            프로젝트 코드 또는 실험 자료는 아래 GitHub 저장소에서 확인할 수 있습니다.
+          </p>
+
+          <a class="source-button" href="https://github.com/your-github-id/your-repository-name" target="_blank">
+            GitHub Repository 보기 →
+          </a>
+        </section> -->
+
+        <div class="bottom-nav">
+          <a href="index.html#patchcore-card" class="nav-button">← 포트폴리오로 돌아가기</a>
+          <a href="#" class="nav-button">맨 위로 ↑</a>
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      © 2026 김유나. All rights reserved.
+    </footer>
+  </div>
+</body>
+</html>
