@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>엑셀 업무 자동화 변환 서비스</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Pretendard", "Noto Sans KR", Arial, sans-serif;
+      background: #faf9f6;
+      color: #2d2d2d;
+      line-height: 1.8;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1060px, 92%);
+      margin: 0 auto;
+      padding: 46px 0 90px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 34px;
+      color: #777;
+      font-size: 15px;
+      transition: 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #222;
+      transform: translateX(-3px);
+    }
+
+    .hero {
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 22px;
+      padding: 42px 46px;
+      margin-bottom: 34px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.035);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 6px 13px;
+      background: #eee7dc;
+      color: #6b5d4c;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .project-title {
+      font-size: 42px;
+      font-weight: 900;
+      color: #3f3f3f;
+      letter-spacing: -1.2px;
+      line-height: 1.25;
+      margin-bottom: 16px;
+    }
+
+    .project-summary {
+      font-size: 18px;
+      color: #5f5f5f;
+      max-width: 880px;
+      margin-bottom: 22px;
+    }
+
+    .project-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .meta-item {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .meta-item strong {
+      color: #333;
+      margin-right: 6px;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      padding: 6px 12px;
+      border-radius: 9px;
+      background: #f1ece4;
+      color: #555;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .content-layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 34px;
+      align-items: start;
+    }
+
+    .toc {
+      position: sticky;
+      top: 28px;
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.03);
+    }
+
+    .toc-title {
+      font-size: 16px;
+      font-weight: 900;
+      font-style: italic;
+      margin-bottom: 14px;
+    }
+
+    .toc a {
+      display: block;
+      color: #777;
+      font-size: 14px;
+      margin-bottom: 10px;
+      transition: 0.2s ease;
+    }
+
+    .toc a:hover {
+      color: #222;
+      padding-left: 4px;
+    }
+
+    .section {
+      background: #ffffff;
+      border: 1px solid #e7e3dc;
+      border-radius: 18px;
+      padding: 34px 38px;
+      margin-bottom: 26px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.035);
+    }
+
+    .section h2 {
+      font-size: 25px;
+      font-weight: 900;
+      font-style: italic;
+      color: #3f3f3f;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee6dc;
+    }
+
+    .section h3 {
+      font-size: 20px;
+      margin: 22px 0 10px;
+      color: #3f3f3f;
+    }
+
+    .section p {
+      color: #444;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+
+    .section ul {
+      padding-left: 22px;
+    }
+
+    .section li {
+      margin-bottom: 10px;
+      color: #444;
+      font-size: 16px;
+    }
+
+    .highlight {
+      background: #fbfaf7;
+      border-left: 4px solid #8b7b66;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-top: 24px;
+      color: #4d4d4d;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .info-card,
+    .role-card,
+    .result-card {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 14px;
+      padding: 22px;
+    }
+
+    .info-card h3,
+    .role-card h3,
+    .result-card h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #3f3f3f;
+    }
+
+    .info-card p,
+    .role-card p,
+    .result-card p {
+      font-size: 15px;
+      color: #555;
+      margin: 0;
+    }
+
+    .result-number {
+      font-size: 30px;
+      font-weight: 900;
+      color: #8b7b66;
+      margin-bottom: 8px;
+    }
+
+    .flow-box {
+      background: #ffffff;
+      border: 1px solid #eee6dc;
+      border-radius: 16px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+
+    .flow-step {
+      background: #fbfaf7;
+      border: 1px solid #eee6dc;
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      color: #444;
+      font-size: 15px;
+    }
+
+    .flow-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .flow-step strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .image-box {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #eee6dc;
+      border-radius: 16px;
+      padding: 18px;
+      margin: 24px 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .image-box img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: 560px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: 12px;
+      border: 1px solid #eee6dc;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .image-caption {
+      font-size: 14px;
+      color: #777;
+      text-align: center;
+      margin-top: -4px;
+    }
+
+    .source-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 18px;
+      margin-right: 8px;
+      background: #333;
+      color: #fff;
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .source-button:hover {
+      background: #8b7b66;
+      transform: translateY(-2px);
+    }
+
+    .bottom-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 40px;
+    }
+
+    .nav-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #333;
+      color: #fff;
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .nav-button:hover {
+      background: #8b7b66;
+      transform: translateY(-2px);
+    }
+
+    footer {
+      text-align: center;
+      color: #aaa;
+      font-size: 13px;
+      margin-top: 70px;
+    }
+
+    @media (max-width: 900px) {
+      .content-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .toc {
+        position: static;
+      }
+
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: 92%;
+        padding-top: 30px;
+      }
+
+      .hero {
+        padding: 32px 24px;
+      }
+
+      .project-title {
+        font-size: 30px;
+      }
+
+      .project-summary {
+        font-size: 16px;
+      }
+
+      .section {
+        padding: 28px 22px;
+      }
+
+      .bottom-nav {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <a href="index.html#excel-automation-card" class="back-link">← 포트폴리오로 돌아가기</a>
+
+    <header class="hero">
+      <span class="eyebrow">Project Detail</span>
+
+      <h1 class="project-title">엑셀 업무 자동화 변환 서비스</h1>
+
+      <p class="project-summary">
+        반복적인 엑셀 업무를 줄이기 위해, 사용자가 엑셀 파일을 업로드하면 Python으로 파일을 읽고
+        원하는 형식에 맞게 자동 변환한 뒤 새로운 엑셀 파일로 다운로드할 수 있는 Streamlit 기반 업무 자동화 서비스를 구현했습니다.
+      </p>
+
+      <div class="project-meta">
+        <div class="meta-item"><strong>기간</strong>2026.03 ~ 2026.03</div>
+        <div class="meta-item"><strong>형태</strong>개인 프로젝트</div>
+        <div class="meta-item"><strong>역할</strong>기획 / Python 자동화 구현 / Streamlit 웹 서비스 개발 / 배포</div>
+      </div>
+
+      <div class="tag-list">
+        <span class="tag">Python</span>
+        <span class="tag">Pandas</span>
+        <span class="tag">Excel Automation</span>
+        <span class="tag">File Processing</span>
+        <span class="tag">Streamlit</span>
+        <span class="tag">Web Deployment</span>
+        <span class="tag">Workflow Automation</span>
+      </div>
+    </header>
+
+    <div class="content-layout">
+      <aside class="toc">
+        <p class="toc-title">CONTENTS</p>
+        <a href="#overview">01. Project Overview</a>
+        <a href="#motivation">02. Motivation & Goal</a>
+        <a href="#role">03. My Role</a>
+        <a href="#workflow">04. Service Workflow</a>
+        <a href="#implementation">05. Implementation</a>
+        <a href="#result">06. Result</a>
+        <a href="#service">07. Service Link</a>
+        <a href="#source">08. Source Code</a>
+      </aside>
+
+      <main>
+        <section class="section" id="overview">
+          <h2>01. Project Overview</h2>
+
+          <p>
+            본 프로젝트는 반복적으로 수행되는 엑셀 파일 정리 및 변환 업무를 자동화하기 위해 구현한
+            Python 기반 엑셀 자동화 서비스입니다.
+          </p>
+
+          <p>
+            사용자는 웹페이지에 엑셀 파일을 업로드하고, 서비스는 해당 파일을 읽어 필요한 데이터 구조로 변환한 뒤
+            새로운 엑셀 파일로 생성합니다. 생성된 파일은 사용자가 바로 다운로드하여 업무에 활용할 수 있도록 구성했습니다.
+          </p>
+
+          <div class="highlight">
+            핵심은 단순한 코드 실습이 아니라, 실제 가족의 반복 업무에서 문제를 발견하고
+            이를 Python 자동화와 웹 서비스 배포로 해결한 실사용 목적의 프로젝트라는 점입니다.
+          </div>
+        </section>
+
+        <section class="section" id="motivation">
+          <h2>02. Motivation & Goal</h2>
+
+          <h3>Project Motivation</h3>
+          <p>
+            어머니께서 엑셀 파일을 반복적으로 수정하고 정리하는 업무를 수행하시는 과정에서,
+            같은 형식의 작업을 매번 수작업으로 처리해야 하는 불편함이 있다는 점을 알게 되었습니다.
+          </p>
+
+          <p>
+            이러한 반복 작업은 시간이 오래 걸릴 뿐 아니라, 사람이 직접 복사·수정·정리하는 과정에서
+            실수가 발생할 가능성도 존재합니다. 이에 Python을 활용해 엑셀 파일을 자동으로 읽고,
+            원하는 형식으로 변환해주는 도구를 만들고자 했습니다.
+          </p>
+
+          <h3>Project Goal</h3>
+          <ul>
+            <li>반복적인 엑셀 정리 업무를 자동화하여 작업 시간 단축</li>
+            <li>엑셀 파일 업로드 후 자동 변환 및 다운로드 기능 구현</li>
+            <li>Python 기반 데이터 처리 로직 구현</li>
+            <li>비개발자도 사용할 수 있도록 Streamlit 웹 서비스 형태로 구성</li>
+            <li>Streamlit Cloud를 통해 외부에서도 접근 가능한 서비스로 배포</li>
+          </ul>
+        </section>
+
+        <section class="section" id="role">
+          <h2>03. My Role</h2>
+
+          <div class="card-grid">
+            <div class="role-card">
+              <h3>Problem Definition</h3>
+              <p>
+                실제 엑셀 업무에서 반복적으로 발생하는 파일 정리 및 형식 변환 문제를 파악하고,
+                자동화 가능한 작업 단위로 문제를 정의했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>Excel File Processing</h3>
+              <p>
+                Python을 활용하여 업로드된 엑셀 파일을 읽고, 필요한 데이터만 추출하거나
+                원하는 구조로 재정렬하는 처리 로직을 구현했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>Output File Generation</h3>
+              <p>
+                변환된 데이터를 새로운 엑셀 파일로 생성하고,
+                사용자가 바로 다운로드하여 업무에 활용할 수 있도록 구성했습니다.
+              </p>
+            </div>
+
+            <div class="role-card">
+              <h3>Streamlit Web Service</h3>
+              <p>
+                비개발자도 쉽게 사용할 수 있도록 Streamlit 기반 웹 인터페이스를 구현하고,
+                Streamlit Cloud를 통해 외부에서 접근 가능한 형태로 배포했습니다.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="workflow">
+          <h2>04. Service Workflow</h2>
+
+          <p>
+            서비스는 사용자가 엑셀 파일을 업로드하면, Python 기반 처리 로직을 통해 파일을 변환하고
+            새로운 엑셀 파일로 다운로드할 수 있도록 동작합니다.
+          </p>
+
+          <div class="flow-box">
+            <div class="flow-step">
+              <strong>Step 1. 엑셀 파일 업로드</strong>
+              사용자가 Streamlit 웹페이지에서 변환할 엑셀 파일을 업로드합니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 2. Python 기반 파일 읽기</strong>
+              업로드된 엑셀 파일을 Python으로 읽고, 필요한 시트와 데이터를 불러옵니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 3. 데이터 구조 변환</strong>
+              업무에서 요구되는 형식에 맞게 열 이름, 데이터 순서, 값 구조 등을 자동으로 변환합니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 4. 새로운 엑셀 파일 생성</strong>
+              변환된 데이터를 새로운 엑셀 파일로 저장할 수 있도록 파일을 생성합니다.
+            </div>
+
+            <div class="flow-step">
+              <strong>Step 5. 파일 다운로드</strong>
+              사용자는 변환된 엑셀 파일을 바로 다운로드하여 실제 업무에 활용할 수 있습니다.
+            </div>
+          </div>
+
+          <div class="highlight">
+            이 흐름을 통해 사용자는 엑셀 파일을 직접 수정하지 않고도,
+            업로드와 다운로드만으로 반복적인 형식 변환 작업을 처리할 수 있습니다.
+          </div>
+
+          <div class="image-box">
+            <img src="./EM_excel/0.jpg" alt="엑셀 자동화 서비스 화면 이미지 1" />
+            <img src="./EM_excel/1.jpg" alt="엑셀 자동화 서비스 화면 이미지 2" />
+          </div>
+
+        </section>
+
+        <section class="section" id="implementation">
+          <h2>05. Implementation</h2>
+
+          <p>
+            본 서비스는 Python을 기반으로 엑셀 파일을 처리하고, Streamlit을 활용하여 웹 인터페이스를 구성했습니다.
+            로컬에서만 실행되는 스크립트가 아니라, 실제 사용자가 웹에서 접근할 수 있는 형태로 배포한 것이 특징입니다.
+          </p>
+
+          <div class="card-grid">
+            <div class="info-card">
+              <h3>Excel Input</h3>
+              <p>
+                사용자가 업로드한 엑셀 파일을 읽어 데이터프레임 형태로 변환했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Data Transformation</h3>
+              <p>
+                기존 엑셀 구조를 업무에서 필요한 형식으로 자동 변환하는 처리 로직을 구성했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Excel Output</h3>
+              <p>
+                변환 결과를 새로운 엑셀 파일로 생성하고, 다운로드 가능한 형태로 제공했습니다.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h3>Web Deployment</h3>
+              <p>
+                Streamlit Cloud를 통해 외부 사용자가 접근 가능한 웹 서비스로 배포했습니다.
+              </p>
+            </div>
+          </div>
+
+          <h3>사용 기술</h3>
+          <ul>
+            <li>Python: 엑셀 파일 처리 및 변환 로직 구현</li>
+            <li>Pandas: 엑셀 데이터 읽기, 정리, 변환</li>
+            <li>OpenPyXL 또는 Excel Writer: 엑셀 파일 저장 및 다운로드 파일 생성</li>
+            <li>Streamlit: 파일 업로드, 변환 실행, 다운로드 UI 구성</li>
+            <li>Streamlit Cloud: 웹 서비스 배포</li>
+          </ul>
+
+        </section>
+
+        <section class="section" id="result">
+          <h2>06. Result</h2>
+
+          <p>
+            프로젝트 결과, 반복적으로 수행되던 엑셀 파일 정리 과정을 자동화하여
+            사용자가 직접 파일을 수정하지 않고도 원하는 형식의 엑셀 파일을 생성할 수 있도록 구현했습니다.
+          </p>
+
+          <div class="image-box">
+            <img src="./EM_excel/2.jpg" alt="엑셀 자동화 서비스 이미지 1" />
+          </div>
+
+          <div class="card-grid">
+            <div class="result-card">
+              <h3>반복 업무 자동화</h3>
+              <div class="result-number">자동 변환</div>
+              <p>
+                수작업으로 처리하던 엑셀 형식 변환 과정을 Python 로직으로 자동화했습니다.
+              </p>
+            </div>
+
+            <div class="result-card">
+              <h3>사용자 접근성</h3>
+              <div class="result-number">Web</div>
+              <p>
+                Streamlit 웹페이지에서 파일 업로드와 다운로드만으로 사용할 수 있도록 구성했습니다.
+              </p>
+            </div>
+
+            <div class="result-card">
+              <h3>파일 출력</h3>
+              <div class="result-number">Excel</div>
+              <p>
+                변환된 결과를 새로운 엑셀 파일로 생성하여 실제 업무에 바로 활용할 수 있도록 했습니다.
+              </p>
+            </div>
+
+            <div class="result-card">
+              <h3>서비스 배포</h3>
+              <div class="result-number">Streamlit</div>
+              <p>
+                Streamlit Cloud를 통해 외부에서도 접근 가능한 서비스로 배포했습니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="highlight">
+            이 프로젝트를 통해 단순 반복 업무를 자동화하면 실제 사용자의 작업 시간을 줄이고,
+            수작업 과정에서 발생할 수 있는 오류를 줄일 수 있음을 확인했습니다.
+          </div>
+        </section>
+
+        <section class="section" id="service">
+          <h2>07. Service Link</h2>
+
+          <p>
+            배포된 서비스는 아래 링크에서 확인할 수 있습니다.
+          </p>
+
+          <a class="source-button" href="https://ermore-service-yn.streamlit.app/" target="_blank">
+            배포 서비스 보기 →
+          </a>
+
+        </section>
+
+        <section class="section" id="source">
+            <h2>08. Source Code</h2>
+          
+            <p>
+              엑셀 파일 업로드, 데이터 변환, 새로운 엑셀 파일 생성 및 다운로드 기능을 구현한
+              프로젝트 코드는 아래 GitHub 저장소에서 확인할 수 있습니다.
+            </p>
+          
+            <a class="source-button" href="https://github.com/YuNa-Kim-344/ermore-service" target="_blank">
+              GitHub Repository 보기 →
+            </a>
+          </section>
+
+        <div class="bottom-nav">
+          <a href="index.html#excel-automation-card" class="nav-button">← 포트폴리오로 돌아가기</a>
+          <a href="#" class="nav-button">맨 위로 ↑</a>
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      © 2026 김유나. All rights reserved.
+    </footer>
+  </div>
+</body>
+</html>
